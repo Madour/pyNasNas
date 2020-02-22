@@ -1,0 +1,6 @@
+.idea
+.git
+doc
+ignored
+__pycache__/
+*.py[cod]
