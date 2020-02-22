@@ -36,7 +36,7 @@ class GameEngine:
         self.inputs = []
 
         # Scene is where everything is drawn on
-        self.scene = scene.Scene(w_width, w_height)
+        self.create_scene(w_width, w_height)
 
         # a view used to keep aspect ratio of the game when the window is resized
         self.screen_view = camera.Camera()
@@ -157,8 +157,8 @@ class GameEngine:
     def render(self):
         """
         Draw all Layers in order.
-        Layer 0 will be drawn last, and will appear on the top
-        It is adviced to not override this method.
+        Layer 0 will be drawn first, layer 1 will be drawn over layer 0 etc
+        Internal use only, do not override this method.
         """
         self.scene.update()
 
