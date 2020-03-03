@@ -1,5 +1,5 @@
 # pySFML Game Engine
-### A simple game engine to get started with python and sfml.
+### A simple game engine to get started quickly with python and sfml.
 
 #### Features :
  - [x] Automatic resource loader and  manager system
@@ -26,7 +26,7 @@ YourProject
     main.py
 ```
 
-Download the project and copy the sfmlGameEngine folder into your project src folder.
+Download the repository and copy the sfmlGameEngine folder into your project src folder.
 ```
 YourProject
     |_ assets
