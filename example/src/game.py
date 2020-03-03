@@ -13,6 +13,7 @@ class MyGame(ge.GameEngine):
     V_WIDTH = 20*16
     V_HEIGHT = 12*16
     TITLE = "pySFML Game Engine - Example Game"
+
     def __init__(self):
         super().__init__(self.TITLE, self.W_WIDTH, self.W_HEIGHT, self.V_WIDTH, self.V_HEIGHT, 60)
 
@@ -22,7 +23,7 @@ class MyGame(ge.GameEngine):
 
         self.level = ge.Res.maps.level
 
-        self.create_scene(self.level.width * 16, self.level.height * 16)
+        self.scene = self.create_scene(self.level.width * 16, self.level.height * 16)
 
         self.player = entities.Player()
         self.player.position = (2*16, 7*16)
@@ -37,10 +38,11 @@ class MyGame(ge.GameEngine):
         self.text_bitmap4.position = self.player.position + sf.Vector2(0, -60)
         self.light_growing = True
 
-        self.screen_view.follow(self.player)
+        self.game_camera.follow(self.player)
+        self.game_camera.scene = self.scene
 
-        self.minimap.follow(self.player)
-        self.show_minimap = False
+        self.minimap_camera.follow(self.player)
+        self.minimap_camera.scene = self.scene
 
         map_back_layer = ge.layers.Layer("map_back", self.level.layers["back"])
         map_front_layer = ge.layers.Layer("map_front", self.level.layers["front"])
@@ -67,7 +69,7 @@ class MyGame(ge.GameEngine):
         self.add_debug_text(self.player, "onground", (0, 0))
         self.add_debug_text(self.player, "remaining_jumps", (150, 0))
         self.add_debug_text(self, "inputs", (0, 16))
-        self.add_debug_text(self.player, "position", (0, 32))
+        self.add_debug_text(self.player, "velocity", (0, 32))
 
     def event_handler(self, event):
         if event == sf.Event.KEY_PRESSED:
@@ -89,7 +91,7 @@ class MyGame(ge.GameEngine):
                     self.scene.add_layer(self.map_collisions_layer, 2)
                 self.debug = not self.debug
             elif event["code"] == ge.Keyboard.M:
-                self.show_minimap = not self.show_minimap
+                self.minimap_camera.visible = not self.minimap_camera.visible
             elif event["code"] == ge.Keyboard.L:
                 if self.scene.masks:
                     self.scene.remove_mask(self.mask)
@@ -97,10 +99,7 @@ class MyGame(ge.GameEngine):
                     self.scene.add_mask(self.mask)
 
     def update(self):
-
-        self.screen_view.update(self.dt)
-        if self.show_minimap:
-            self.minimap.update(self.dt)
+        super().update()
 
         self.level.layers["front"].update()
 

@@ -108,7 +108,7 @@ class BaseEntity(GameObject, sf.Drawable):
 
 
 class PlatformerEntity(BaseEntity):
-    def __init__(self, data: dict):
+    def __init__(self, data):
         super().__init__(data)
         self.sprite.origin = (self.sprite.texture_rectangle.width / 2, self.sprite.texture_rectangle.height)
         if self.anims[self.state].frames_origin:
@@ -147,7 +147,13 @@ class PlatformerEntity(BaseEntity):
         if -0.05 < self.velocity.x < 0.05:
             self.velocity.x = 0
         else:
-            self.velocity.x = self.velocity.x * 0.80
+            if self.onground:
+                self.velocity.x = self.velocity.x * 0.80
+            else:
+                if self.velocity.x < 0:
+                    self.velocity.x += 0.3
+                else:
+                    self.velocity.x -= 0.3
         if self.state != "idle":
             self.state = "idle"
             self.anim_index = 0

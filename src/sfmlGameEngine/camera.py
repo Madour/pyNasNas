@@ -3,26 +3,54 @@ from .data.game_obj import GameObject
 
 
 class Camera(GameObject, sf.View):
-    def __init__(self):
+    def __init__(self, name):
         super().__init__()
+        self.name = name
         self.reference = None
         self.frames_delay = 15
-        self.size = (0, 0)
+        self.base_pos = sf.Vector2(0, 0)
+        self.base_size = sf.Vector2(0, 0)
+        self.vp_base_pos = sf.Vector2(0, 0)
+        self.vp_base_size = sf.Vector2(1, 1)
+        self.visible = True
+        self._scene = []
 
     def reset(self, position: tuple, size: tuple):
         if type(position) in [tuple, sf.Vector2]:
             if isinstance(position, tuple):
                 super().reset(sf.Rect(position, size))
-                self.size = sf.Vector2(size[0], size[1])
+                self.base_pos = position
+                self.base_size = sf.Vector2(size[0], size[1])
             elif isinstance(position, sf.Vector2):
                 super().reset(sf.Rect(position, size))
-                self.size = size
+                self.base_pos = position
+                self.base_size = size
         else:
             raise TypeError("position argument of Camera.reset() should be a tuple.")
 
     @property
+    def scene(self):
+        return self._scene[0]
+
+    @scene.setter
+    def scene(self, val):
+        if not self._scene:
+            self._scene.append(val)
+        else:
+            self._scene[0] = val
+
+    def has_scene(self):
+        if self._scene:
+            return True
+        return False
+
+    @property
     def position(self):
         return sf.Vector2(self.left, self.top)
+
+    @property
+    def size(self):
+        return sf.Vector2(self.base_size.x, self.base_size.y)
 
     @property
     def left(self):

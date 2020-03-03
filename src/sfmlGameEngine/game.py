@@ -1,14 +1,18 @@
 from sfml import sf
 from os.path import join
+
 from .data.game_obj import GameObject
 from .data import const
+
 from .reslib.resource_path import resource_path, RES_DIR
 from .reslib import Res
 
 from . import camera
 from . import layers
-from . import scene
+from . import scenes
 from . import debug
+from .data.rect import Rect
+from .debug import Logger
 
 
 class GameEngine:
@@ -34,26 +38,28 @@ class GameEngine:
 
         # inputs from keyboard are stored in this list
         self.inputs = []
+        # list of all cameras/view used in the game
+        self.cameras = []
+        # list of all scenes used in the game, usually 1 is enough
+        self.scenes = []
 
         # Scene is where everything is drawn on
-        self.scene = scene.Scene(w_width, w_height)
+        self.scene = self.create_scene(w_width, w_height)
 
-        # a view used to keep aspect ratio of the game when the window is resized
-        self.screen_view = camera.Camera()
-        self.screen_view.reset((0, 0), (v_width, v_height))
+        # a camera used to keep aspect ratio of the game when the window is resized
+        self._default_cam = self.create_camera("default", Rect((0, 0), (w_width, w_height)))
 
-        self.show_minimap = True
-        self.minimap = camera.Camera()
-        self.minimap.reset((0, 0), (v_width*3, v_height*3))
-        self.minimap.viewport = sf.Rect((0.8, 0), (0.2, 0.2))
-        self.minimap.frames_delay = 0
+        self.game_camera = self.create_camera("game", Rect((0, 0), (v_width, v_height)))
+
+        self.minimap_camera = self.create_camera("nminimap", Rect((0, 0), (v_width*3, v_height*3)), Rect((0.8, 0), (0.2, 0.2)))
+        self.minimap_camera.frames_delay = 0
 
         # clock and dt used for FPS calculation
         self.clock = sf.Clock()
         self.dt = 0
 
-        self.debug = False
-        self.debug_texts = [] #: list of DebugText
+        self.debug = True
+        self.debug_texts = []  #: list of DebugText
 
         self.scale_view()
 
@@ -64,7 +70,6 @@ class GameEngine:
         Initialize Res and load all resources in RES_DIR
         """
         if loading_image:
-            import time
             window = sf.RenderWindow(sf.VideoMode(160, 90), "Game Base", sf.Style.NONE)
             l = sf.Sprite(sf.Texture.from_file(resource_path(join(RES_DIR, "loading.png"))))
             window.draw(l)
@@ -75,7 +80,30 @@ class GameEngine:
             Res.load()
 
     def create_scene(self, width: int, height: int):
-        self.scene = scene.Scene(width, height)
+        s = scenes.Scene(width, height)
+        self.scenes.append(s)
+        return s
+
+    def create_camera(self, name: str, camwindow: Rect, viewport: Rect = Rect((0, 0), (1, 1))):
+        """ Create a new Camera and returns it
+        @param: name : str : The name of the camera, should be unique.
+
+        @param camwindow : sf.Rect : The window the camera is looking at.
+        For exemple, a camera with a window=sf.Rect((0, 10,), (20, 20)) will look at a square 20x20 located at (0, 10)
+
+        @param viewport : sf.Rect : The place and surface the camera will take on the window.
+        If we take the previous window, and a viewport of sf.Rect((0.5, 0), (0.2, 0.2)), the window looked at will
+        be displayed on a surface equal to 20% x 20% of the window located at (50%, 0) of the window size.
+
+        @return : cam : Camera : returns the created camera
+        """
+        cam = camera.Camera(name)
+        cam.reset(camwindow.topleft, camwindow.size)
+        cam.viewport = viewport
+        cam.vp_base_size = viewport.size
+        cam.vp_base_pos = viewport.topleft
+        self.cameras.append(cam)
+        return cam
 
     def add_debug_text(self, instance:object, attr_name: str, position: tuple, float_round: int = None):
         """
@@ -88,7 +116,6 @@ class GameEngine:
             self.debug_texts.append(debug.DebugText(instance, attr_name, position, float_round))
         else:
             self.debug_texts.append(debug.DebugText(instance, attr_name, position))
-
 
     def enter_fullscreen(self):
         self.window.close()
@@ -110,22 +137,26 @@ class GameEngine:
 
     def scale_view(self):
         """
-        Scales self.screen_view to keep aspect ratio of the game when the window is resized
+        Scales self._default_cam to keep aspect ratio of the game when the window is resized
         """
         # larger than usual window
         if float(self.window.size.x) / float(self.window.size.y) > self.W_WIDTH / self.W_HEIGHT:
-            viewport_h = 1
             viewport_w = (float(self.window.size.y) * (self.W_WIDTH / self.W_HEIGHT)) / float(self.window.size.x)
-            viewport_y = 0
+            viewport_h = 1
             viewport_x = (1-viewport_w)/2
+            viewport_y = 0
         # higher than usual window
         else:
             viewport_w = 1
             viewport_h = (float(self.window.size.x) / (self.W_WIDTH / self.W_HEIGHT)) / float(self.window.size.y)
             viewport_x = 0
             viewport_y = (1-viewport_h)/2
-        if self.screen_view:
-            self.screen_view.viewport = sf.Rect((viewport_x, viewport_y), (viewport_w, viewport_h))
+        for cam in self.cameras:
+            cam.viewport = sf.Rect(
+                (viewport_x + cam.vp_base_pos.x*(1-2*viewport_x), viewport_y + cam.vp_base_pos.y*(1-2*viewport_y)),
+                (viewport_w * cam.vp_base_size.x, viewport_h * cam.vp_base_size.y)
+            )
+
 
     def _key_handler(self, key: int, event_type: str):
         if key not in self.inputs and event_type == "pressed":
@@ -152,22 +183,22 @@ class GameEngine:
         pass
 
     def update(self):
-        pass
+        for cam in self.cameras:
+            cam.update(self.dt)
 
     def render(self):
         """
         Draw all Layers in order.
-        Layer 0 will be drawn last, and will appear on the top
-        It is adviced to not override this method.
+        Layer 0 will be drawn first, layer 1 will be drawn over layer 0 etc
+        Internal use only, do not override this method.
         """
-        self.scene.update()
-
-        self.window.view = self.screen_view
-        self.window.draw(self.scene)
-
-        if self.show_minimap:
-            self.window.view = self.minimap
-            self.window.draw(self.scene)
+        for scene in self.scenes:
+            scene.update()
+        for cam in self.cameras:
+            if cam.visible:
+                self.window.view = cam
+                if cam.has_scene():
+                    self.window.draw(cam.scene)
 
     def run(self):
         while self.window.is_open:
@@ -179,14 +210,14 @@ class GameEngine:
                 self.event_handler(event)
 
             self.update()
-
             # if (1/self.dt) <= self.desired_fps/2:
             #     self.update()
 
             self.window.clear(sf.Color.BLACK)
+
             self.render()
 
-            self.window.view = self.window.default_view
+            self.window.view = self._default_cam
             if self.debug:
                 for txt in self.debug_texts:
                     txt.update()
