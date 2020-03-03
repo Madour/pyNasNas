@@ -8,21 +8,32 @@ from .reslib.resource_path import resource_path, RES_DIR
 from .reslib import Res
 
 from . import camera
-from . import layers
 from . import scenes
 from . import debug
 from .data.rect import Rect
-from .debug import Logger
 
 
 class GameEngine:
     W_WIDTH = 160*6     # window width
     W_HEIGHT = 90*6     # window height
-    V_WIDTH = 160*2     # view width
-    V_HEIGHT = 90*2     # view height
+    V_WIDTH = 160*6     # view width
+    V_HEIGHT = 90*6     # view height
 
     def __init__(self, title: str = None, w_width: int = 960, w_height: int = 540,
                  v_width: int = 320, v_height: int = 180, desired_fps: int = 60):
+        """
+        Initializes the engine and creates:
+            - a window
+            - a main scene
+            - cameras (game, minimap and UI)
+        Args:
+            title (str): title of the game window
+            w_width (int): window width
+            w_height (int): window height
+            v_width (int): game view width
+            v_height (int): game view height
+            desired_fps (int):
+        """
         GameObject.game = self
 
         # Game name, displayed in window title
@@ -39,7 +50,7 @@ class GameEngine:
         # inputs from keyboard are stored in this list
         self.inputs = []
         # list of all cameras/view used in the game
-        self.cameras = []
+        self.cameras = {}
         # list of all scenes used in the game, usually 1 is enough
         self.scenes = []
 
@@ -47,11 +58,11 @@ class GameEngine:
         self.scene = self.create_scene(w_width, w_height)
 
         # a camera used to keep aspect ratio of the game when the window is resized
-        self._default_cam = self.create_camera("default", Rect((0, 0), (w_width, w_height)))
+        self.ui_camera = self.create_camera("default", 1, Rect((0, 0), (w_width, w_height)))
 
-        self.game_camera = self.create_camera("game", Rect((0, 0), (v_width, v_height)))
+        self.game_camera = self.create_camera("game", 0, Rect((0, 0), (v_width, v_height)))
 
-        self.minimap_camera = self.create_camera("nminimap", Rect((0, 0), (v_width*3, v_height*3)), Rect((0.8, 0), (0.2, 0.2)))
+        self.minimap_camera = self.create_camera("nminimap", 2, Rect((0, 0), (v_width*3, v_height*3)), Rect((0.8, 0), (0.2, 0.2)))
         self.minimap_camera.frames_delay = 0
 
         # clock and dt used for FPS calculation
@@ -64,10 +75,12 @@ class GameEngine:
         self.scale_view()
 
     @staticmethod
-    def load_resources(loading_image=None):
-        """Static method that load all resources
+    def load_resources(loading_image: bool = False):
+        """
+        Initialize the resources manager Res and load all resources in RES_DIR
 
-        Initialize Res and load all resources in RES_DIR
+        Args:
+            loading_image (bool): Set to True to show a small Loading window when Res is loading assets.
         """
         if loading_image:
             window = sf.RenderWindow(sf.VideoMode(160, 90), "Game Base", sf.Style.NONE)
@@ -79,38 +92,62 @@ class GameEngine:
         else:
             Res.load()
 
-    def create_scene(self, width: int, height: int):
+    def create_scene(self, width: int, height: int) -> scenes.Scene:
+        """
+        Creates a new Scene and returns it.
+
+        Args:
+            width (int): width of the new scene
+            height (int): height of the new scene
+
+        Returns:
+            Returns the created Scene.
+        """
         s = scenes.Scene(width, height)
         self.scenes.append(s)
         return s
 
-    def create_camera(self, name: str, camwindow: Rect, viewport: Rect = Rect((0, 0), (1, 1))):
-        """ Create a new Camera and returns it
-        @param: name : str : The name of the camera, should be unique.
+    def create_camera(self, name: str, order: int, camwindow: Rect, viewport: Rect = Rect((0, 0), (1, 1))) -> camera.Camera:
+        """
+        Creates a new Camera and returns it
 
-        @param camwindow : sf.Rect : The window the camera is looking at.
-        For exemple, a camera with a window=sf.Rect((0, 10,), (20, 20)) will look at a square 20x20 located at (0, 10)
+        Args:
+            name (str):
+                The name of the new Camera, should be unique.
+            order (int):
+                The order of display. 0 will be displayed first, 1 will be displayed over 0, etc
+            camwindow (Rect):
+                The window the Camera is looking at.
+                For exemple, a Camera with a window=sf.Rect((0, 10), (20, 20)) will look at a square 20x20 located at (0, 10)
+            viewport (Rect):
+                The place and surface the Camera will take on the window.
+                If we take the previous window, and a viewport of sf.Rect((0.5, 0), (0.2, 0.2)), the window looked at will
+                be displayed on a surface equal to 20% x 20% of the window located at (50%, 0) of the window size.
 
-        @param viewport : sf.Rect : The place and surface the camera will take on the window.
-        If we take the previous window, and a viewport of sf.Rect((0.5, 0), (0.2, 0.2)), the window looked at will
-        be displayed on a surface equal to 20% x 20% of the window located at (50%, 0) of the window size.
-
-        @return : cam : Camera : returns the created camera
+        Returns:
+            Returns the created Camera.
         """
         cam = camera.Camera(name)
         cam.reset(camwindow.topleft, camwindow.size)
         cam.viewport = viewport
         cam.vp_base_size = viewport.size
         cam.vp_base_pos = viewport.topleft
-        self.cameras.append(cam)
+        self.cameras[order] = cam
         return cam
 
     def add_debug_text(self, instance:object, attr_name: str, position: tuple, float_round: int = None):
         """
         Adds a DebugText to self.debug_texts. The text will be drawn at the given position
-        instance         : Any object instance
-        attr_name :str   : Attribute of the given object you want to draw its value
-        position : tuple : The position where the text will be drawn
+
+        Args:
+            instance (object):
+                An instance of any object.
+            attr_name (str):
+                Attribute name of the instance.
+            position (tuple):
+                The position where the text will be drawn
+            float_round (int):
+                If the attribute value is a float, rounds that float using round(instance.attr_name, float_round)
         """
         if float_round:
             self.debug_texts.append(debug.DebugText(instance, attr_name, position, float_round))
@@ -137,7 +174,7 @@ class GameEngine:
 
     def scale_view(self):
         """
-        Scales self._default_cam to keep aspect ratio of the game when the window is resized
+        Scales all Cameras to keep a good apsect ratio and avoid deformation when resizing the window.
         """
         # larger than usual window
         if float(self.window.size.x) / float(self.window.size.y) > self.W_WIDTH / self.W_HEIGHT:
@@ -151,7 +188,7 @@ class GameEngine:
             viewport_h = (float(self.window.size.x) / (self.W_WIDTH / self.W_HEIGHT)) / float(self.window.size.y)
             viewport_x = 0
             viewport_y = (1-viewport_h)/2
-        for cam in self.cameras:
+        for cam in self.cameras.values():
             cam.viewport = sf.Rect(
                 (viewport_x + cam.vp_base_pos.x*(1-2*viewport_x), viewport_y + cam.vp_base_pos.y*(1-2*viewport_y)),
                 (viewport_w * cam.vp_base_size.x, viewport_h * cam.vp_base_size.y)
@@ -159,6 +196,12 @@ class GameEngine:
 
 
     def _key_handler(self, key: int, event_type: str):
+        """
+        Update inputs list.
+        Args:
+            key (int): code of a key.
+            event_type (str): equals "pressed" when a key is pressed or "released" when it is released.
+        """
         if key not in self.inputs and event_type == "pressed":
             self.inputs.insert(0, key)
         else:
@@ -167,8 +210,11 @@ class GameEngine:
 
     def _store_inputs(self, event: sf.Event):
         """
-        Add all key pressed to self.inputs
+        Add all pressed keys to self.inputs
         Calls self.scale_view() when the window is resized
+
+        Args:
+            event (sf.Event): a window event
         """
         if event == sf.Event.CLOSED:
             self.window.close()
@@ -180,27 +226,43 @@ class GameEngine:
             self.scale_view()
 
     def event_handler(self, event: sf.Event):
+        """
+        event_handler is called evry time there is an event happening (key pressed, mouse move, lost focus ...)
+        Override this method to make your own event handling
+
+        Args:
+            event (sf.Event): a window event
+        """
         pass
 
     def update(self):
-        for cam in self.cameras:
+        """
+        Update all Cameras used.
+        Override this method without forgetting to call super().update()
+        """
+        for cam in self.cameras.values():
             cam.update(self.dt)
 
-    def render(self):
+    def _render(self):
         """
-        Draw all Layers in order.
+        Draw all Scenes and Layers in order.
         Layer 0 will be drawn first, layer 1 will be drawn over layer 0 etc
-        Internal use only, do not override this method.
+        Internal usage only, do not override or call this method.
         """
         for scene in self.scenes:
             scene.update()
-        for cam in self.cameras:
+
+        sorted_cameras = [cam for order, cam in sorted(self.cameras.items(), key=lambda item: item[0])]
+        for cam in sorted_cameras:
             if cam.visible:
                 self.window.view = cam
                 if cam.has_scene():
                     self.window.draw(cam.scene)
 
     def run(self):
+        """
+        Starts the game loop.
+        """
         while self.window.is_open:
             self.dt = self.clock.restart().seconds
             self.window.title = self.name+" - FPS:" + str(round(1 / self.dt))
@@ -215,9 +277,9 @@ class GameEngine:
 
             self.window.clear(sf.Color.BLACK)
 
-            self.render()
+            self._render()
 
-            self.window.view = self._default_cam
+            self.window.view = self.ui_camera
             if self.debug:
                 for txt in self.debug_texts:
                     txt.update()

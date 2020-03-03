@@ -36,7 +36,7 @@ class Scene(GameObject, sf.Drawable):
             if order in self.layers.keys():
                 self.layers.pop(order)
 
-    def get_layer(self, name: str):
+    def get_layer(self, name: str) -> layers.Layer:
         for order, layer in self.layers.items():
             if layer.name == name:
                 return layer
@@ -52,7 +52,7 @@ class Scene(GameObject, sf.Drawable):
             self.masks.remove(mask)
 
     def update(self):
-        self.render_texture.clear()
+        self.render_texture.clear(sf.Color.TRANSPARENT)
         sorted_layers = [layer for order, layer in sorted(self.layers.items(), key=lambda item: item[0])]
         for layer in sorted_layers:
             self.render_texture.draw(layer)

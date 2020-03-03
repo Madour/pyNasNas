@@ -65,6 +65,14 @@ class MyGame(ge.GameEngine):
         self.scene.add_layer(map_front_layer, 1)
         self.scene.add_layer(map_back_layer, 0)
 
+        self.ui_scene = self.create_scene(self.window.size.x, self.window.size.y)
+        minimap_bg = sf.RectangleShape()
+        minimap_bg.size = (0.2*self.window.size.x, 0.2*self.window.size.y)
+        minimap_bg.position = (0.8*self.window.size.x, 0)
+        minimap_bg.fill_color = sf.Color.BLACK
+        self.ui_scene.add_layer(ge.layers.Layer("ui", minimap_bg), 10)
+        self.ui_camera.scene = self.ui_scene
+
         self.debug = False
         self.add_debug_text(self.player, "onground", (0, 0))
         self.add_debug_text(self.player, "remaining_jumps", (150, 0))
@@ -100,7 +108,6 @@ class MyGame(ge.GameEngine):
 
     def update(self):
         super().update()
-
         self.level.layers["front"].update()
 
         for layer in self.scene.layers.values():
