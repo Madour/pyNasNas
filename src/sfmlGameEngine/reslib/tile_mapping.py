@@ -4,6 +4,7 @@ from . import textures_loader
 from ..data.game_obj import GameObject
 from ..data import rect
 from .resource_path import resource_path
+from typing import List, Dict, Optional, Union
 
 
 class TilesetsLoader:
@@ -45,6 +46,46 @@ class TilesetsLoader:
 Tilesets_Loader = TilesetsLoader()
 
 
+class MapLayer(GameObject, sf.Drawable):
+    def __init__(self, name: str, visible: bool = True):
+        super().__init__()
+        self.name : str = name
+        self.visible : bool = visible
+        self.properties : Dict[str, Union[int, float, str, bool, sf.Color]] = {}
+        self.animated_tiles : Dict[tuple, AnimatedTile] = {}
+        self.interraction_tiles : Dict[tuple, InterractionTile] = {}
+        self.sprite : Optional[sf.Sprite] = None
+
+    @property
+    def position(self) -> sf.Vector2:
+        return self.sprite.position
+
+    @property
+    def y(self) -> sf.Vector2:
+        return self.sprite.position.y
+
+    def add_property(self, name: str, value):
+        self.properties[name] = value
+
+    def get_property(self, name: str):
+        if name in self.properties:
+            return self.properties[name]
+        else:
+            return None
+
+    def update(self):
+        for tile in self.animated_tiles.values():
+            tile.update()
+
+    def draw(self, target, states):
+        if self.visible:
+            target.draw(self.sprite)
+            for tile in self.animated_tiles.values():
+                target.draw(tile)
+            for tile in self.interraction_tiles.values():
+                target.draw(tile)
+
+
 class TileMap(GameObject):
     def __init__(self, map_name):
         #print("--------------\n"+"---Loading map : ", map_name, "---")
@@ -53,39 +94,42 @@ class TileMap(GameObject):
 
         # tmx = Et.parse(resource_path(MAPS_DIR+map_name+'.tmx'))
         tmx = Et.parse(map_name)
-        root = tmx.getroot()
+        self.root = tmx.getroot()
 
         self.name = map_name[:map_name.find('.')]
-        self.width = int(root.attrib['width'])
-        self.height = int(root.attrib['height'])
+        self.width = int(self.root.attrib['width'])
+        self.height = int(self.root.attrib['height'])
 
-        self.tileW = int(root.attrib['tilewidth'])
-        self.tileH = int(root.attrib['tileheight'])
+        self.tileW = int(self.root.attrib['tilewidth'])
+        self.tileH = int(self.root.attrib['tileheight'])
 
         self.pxWidth = self.width*self.tileW
         self.pxHeight = self.height*self.tileH
 
-        #self.tilesets = {}
         self.tiles_list = []
         self.tiles_array = {}
         self.tilesets = {}
 
+        self.load()
+
+    def load(self):
         # collect tilesets and their information and store it in self.tilesets
-        self.get_tilesets(root.findall('tileset'))
+        self._load_tilesets(self.root.findall('tileset'))
         self.vertices_dict = {}
-        self.render_textures = []
-        self.tile_layers_xml = root.findall('layer')
-        self.object_layers_xml = root.findall('objectgroup')
-        self.layers = {}
+        self.render_textures : List[sf.RenderTexture] = []
+        self.tile_layers_xml = self.root.findall('layer')
+        self.object_layers_xml = self.root.findall('objectgroup')
+        self.layers : Dict[str, MapLayer] = {}
         self.animated_tiles = {}
         self.interraction_tiles = {}
+        self.objects = {}
         self.collisions = []
         self.collisions_shapes = []
 
-        self.parse_map()
-        #print("---Finished loading map :", map_name,"---"+"\n--------------")
+        self._parse_map()
+        # print("---Finished loading map :", map_name,"---"+"\n--------------")
 
-    def get_tilesets(self, tilesets):
+    def _load_tilesets(self, tilesets):
         already_loaded = False
         for tileset_tag in tilesets:
             name = tileset_tag.get('name')
@@ -119,7 +163,7 @@ class TileMap(GameObject):
 
                 }
 
-    def parse_map(self):
+    def _parse_map(self):
         layer_index = 0
         current_tileset = None
         transformations = [0]
@@ -131,7 +175,18 @@ class TileMap(GameObject):
 
             for props in tile_layer_xml.findall('properties'):
                 for prop in props:
-                    self.layers[layer_name].add_property(prop.get('name'), prop.get('value'))
+                    name = prop.get('name')
+                    type = prop.get('type')
+                    val = prop.get('value')
+                    if type == "bool":
+                        val = True if val == "true" else False
+                    elif type == "int":
+                        val = int(val)
+                    elif type == "float":
+                        val = float(val)
+                    elif type == "color":
+                        val = sf.Color(int(val[1:3], 16), int(val[3:5], 16), int(val[5:7], 16), int(val[7:9], 16))
+                    self.layers[layer_name].add_property(name, val)
 
             self.tiles_list = self.xml_to_list(tile_layer_xml)
             self.layers[layer_name].animated_tiles = {}
@@ -172,16 +227,16 @@ class TileMap(GameObject):
 
                     if tile_gid in current_tileset.animations:
                         the_animated_tile = AnimatedTile(current_tileset.animations[tile_gid], i, j, current_tileset)
-                        self.animated_tiles[layer_name][f"{i},{j}"] = the_animated_tile
-                        self.layers[layer_name].animated_tiles[f"{i},{j}"] = the_animated_tile
+                        self.animated_tiles[layer_name][(i, j)] = the_animated_tile
+                        self.layers[layer_name].animated_tiles[(i, j)] = the_animated_tile
                         tile_gid = -1
 
                     if tile_gid in current_tileset.properties:
                         if "interraction" in current_tileset.properties[tile_gid]:
                             if int(current_tileset.properties[tile_gid]["state"]) == 0:
                                 the_interraction_tile = InterractionTile(tile_gid, i, j, current_tileset)
-                                self.interraction_tiles[layer_name][f"{i},{j}"] = the_interraction_tile
-                                self.layers[layer_name].interraction_tiles[f"{i},{j}"] = the_interraction_tile
+                                self.interraction_tiles[layer_name][(i, j)] = the_interraction_tile
+                                self.layers[layer_name].interraction_tiles[(i, j)] = the_interraction_tile
                                 tile_gid = -1
 
                     tx = (tile_gid % current_tileset.width) * self.tileW
@@ -223,23 +278,30 @@ class TileMap(GameObject):
             layer_index += 1
 
         for object_layer in self.object_layers_xml:
-            if object_layer.get('name') == "collisions":
-                self.render_textures.append(self.create_render_texture())
-                self.render_textures[layer_index].clear(sf.Color.TRANSPARENT)
-                self.layers["collisions"] = MapLayer("collisions", visible=True)
-                for box in object_layer:
-                    x, y = int(box.get('x')), int(box.get('y'))
-                    width, height = int(box.get('width')), int(box.get('height'))
-                    self.collisions.append(rect.Rect((x, y), (width, height)))
+            name = object_layer.get("name")
+            self.render_textures.append(self.create_render_texture())
+            self.render_textures[layer_index].clear(sf.Color.TRANSPARENT)
+            self.layers[name] = MapLayer(name, visible=True)
+            self.objects[name] = []
+            color = object_layer.get('color') if object_layer.get('color') else None
+            if color:
+                color = sf.Color(int(color[1:3],16), int(color[3:5], 16), int(color[5:7], 16), 155)
+            else:
+                color = sf.Color(100, 100, 100, 155)
 
-                    shape = sf.RectangleShape((width, height))
-                    shape.position = (x, y)
-                    shape.fill_color = sf.Color(200, 0, 0, 155)
-                    self.collisions_shapes.append(shape)
-                    self.render_textures[layer_index].draw(shape)
-                self.render_textures[layer_index].display()
-                self.layers["collisions"].sprite = sf.Sprite(self.render_textures[layer_index].texture)
-                layer_index += 1
+            for box in object_layer.findall('object'):
+                x, y = int(box.get('x')), int(box.get('y'))
+                width = int(box.get('width')) if  box.get('width') else 0
+                height = int(box.get('height')) if  box.get('height') else 0
+                self.objects[name].append( rect.Rect((x, y), (width, height)) )
+                if name == "collisions": self.collisions = self.objects[name]
+                shape = sf.RectangleShape((width, height))
+                shape.position = (x, y)
+                shape.fill_color = color
+                self.render_textures[layer_index].draw(shape)
+            self.render_textures[layer_index].display()
+            self.layers[name].sprite = sf.Sprite(self.render_textures[layer_index].texture)
+            layer_index += 1
 
     def get_tile_prop(self, x, y, layer, prop_name=None):
         tile_id = self.tiles_array[layer][y][x]
@@ -275,7 +337,7 @@ class TileMap(GameObject):
         xml = layer.find('data').text
         return [int(n) for n in xml.split(',')]
 
-    def create_render_texture(self):
+    def create_render_texture(self) -> sf.RenderTexture:
         return sf.RenderTexture(self.width * self.tileW, self.height * self.tileH)
 
     def get_tex_vertices(self, tx, ty, transformations=None):
@@ -407,48 +469,8 @@ class InterractionTile(sf.Drawable):
         target.draw(self.sprites[self.state], state)
 
 
-class MapLayer(GameObject, sf.Drawable):
-    def __init__(self, name, visible=True):
-        super().__init__()
-        self.name = name
-        self.visible = visible
-        self.properties = {}
-        self.animated_tiles = {}
-        self.interraction_tiles = {}
-        self.sprite = None
-
-    @property
-    def position(self):
-        return self.sprite.position
-
-    @property
-    def y(self):
-        return self.sprite.position.y
-
-    def add_property(self, name, value):
-        self.properties[name] = value
-
-    def get_property(self, name):
-        if name in self.properties:
-            return self.properties[name]
-        else:
-            return None
-
-    def update(self):
-        for tile in self.animated_tiles.values():
-            tile.update()
-
-    def draw(self, target, states):
-        if self.visible:
-            target.draw(self.sprite)
-            for tile in self.animated_tiles.values():
-                target.draw(tile)
-            for tile in self.interraction_tiles.values():
-                target.draw(tile)
-
-
 class TileSet:
-    def __init__(self, tileset_tag, tile_id):
+    def __init__(self, tileset_tag, tileset_id):
         # tileset externe dans un fichier tsx
         if tileset_tag.find('image') is None:
             tsx = Et.parse(resource_path("assets/" + tileset_tag.get('source')))
@@ -460,7 +482,7 @@ class TileSet:
             self.external = False
 
         self.xml = root
-        self.id = tile_id
+        self.id = tileset_id
 
         # on récupere les attributs de la balise tileset
         self.name = root.get('name')
@@ -478,8 +500,8 @@ class TileSet:
             res = getattr(res, dir)
         self.texture = res
 
-        self.properties = {}
-        self.animations = {}
+        self.properties: Dict[int, Dict[str, Union[bool, int, float, str, sf.Color]]] = {}
+        self.animations: Dict[int, List[Dict[str, int]]]  = {}
 
         for tile in root.findall('tile'):
             tile_id = int(tile.get('id'))
@@ -489,7 +511,15 @@ class TileSet:
                     if tile_id not in self.properties:
                         self.properties[tile_id] = {}
                     for prop in child:
-                        self.properties[tile_id].update({prop.get('name'): prop.get('value')})
+                        name = prop.get('name')
+                        type = prop.get('type')
+                        val = prop.get('value')
+                        if type == "bool": val = True if val == "true" else False
+                        elif type == "int": val = int(val)
+                        elif type == "float": val = float(val)
+                        elif type == "color":
+                            val = sf.Color(int(val[1:3], 16), int(val[3:5], 16), int(val[5:7], 16), int(val[7:9], 16))
+                        self.properties[tile_id].update({name: val})
                 # on récupère les animationss
                 if child.tag == 'animation':
                     if tile_id not in self.animations:
@@ -497,7 +527,6 @@ class TileSet:
                     for frame in child:
                         self.animations[tile_id].append(
                             {'id': int(frame.get('tileid')), 'duration': int(frame.get('duration'))})
-
 
 class TileTransformation:
     HORIZONTAL_FLIP = 0x80000000
