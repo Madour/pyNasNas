@@ -9,7 +9,7 @@ class Scene(GameObject, sf.Drawable):
         self.render_texture = sf.RenderTexture(width, height)
         self.sprite = sf.Sprite(self.render_texture.texture)
         self.layers = {}
-        self.masks = []
+        self.masks = {}
 
     @property
     def width(self):
@@ -41,25 +41,27 @@ class Scene(GameObject, sf.Drawable):
             if layer.name == name:
                 return layer
 
-    def add_mask(self, mask: layers.Mask):
+    def add_mask(self, mask: layers.Mask, order: int):
         if isinstance(mask, layers.Mask):
-            self.masks.append(mask)
+            self.masks[order] = mask
         else:
             raise TypeError("Argument mask should be a Mask instance.")
 
     def remove_mask(self, mask: layers.Mask):
-        if mask in self.masks:
-            self.masks.remove(mask)
+        if mask in self.masks.values():
+            self.masks = {key:val for key,val in self.masks.items() if val != mask}
 
     def update(self):
         self.render_texture.clear(sf.Color.TRANSPARENT)
-        sorted_layers = [layer for order, layer in sorted(self.layers.items(), key=lambda item: item[0])]
-        for layer in sorted_layers:
-            self.render_texture.draw(layer)
+        max_layers_order = max(self.layers.keys()) if self.layers.keys() else 0
+        max_masks_order = max(self.masks.keys()) if self.masks.keys() else 0
+        for i in range(max(max_layers_order, max_masks_order)+1):
+            if i in self.layers:
+                self.render_texture.draw(self.layers[i])
+            if i in self.masks:
+                self.masks[i].update()
+                self.render_texture.draw(self.masks[i])
 
-        for mask in self.masks:
-            mask.update()
-            self.render_texture.draw(mask)
         self.render_texture.display()
         self.sprite.texture = self.render_texture.texture
 

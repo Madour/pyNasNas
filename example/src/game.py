@@ -10,18 +10,18 @@ from example.src import entities
 class MyGame(ge.GameEngine):
     def __init__(self):
         super().__init__("pySFML Game Engine - Example Game", 960, 576, 320, 192, 60)
-        ge.game.debug.Logger.log()
         self.window.key_repeat_enabled = False
         self.window.vertical_synchronization = True
         self.window.framerate_limit = 60
 
-        self.level = ge.Res.maps.level
+        self.level = ge.Res.Maps.level
 
         self.scene = self.create_scene(self.level.width * 16, self.level.height * 16)
 
         self.player = entities.Player()
         self.player.position = (2*16, 7*16)
-        bitmap_font = ge.BitmapFont(ge.Res.textures.font, (8, 8), spacings_map={"O": 8})
+
+        bitmap_font = ge.BitmapFont(ge.Res.Textures.font, (8, 8), spacings_map={"O": 8})
         self.text_bitmap = ge.BitmapText("PRESS L TO DISPLAY MASK", bitmap_font)
         self.text_bitmap.position = self.player.position+sf.Vector2(0, -28)
         self.text_bitmap2 = ge.BitmapText("PRESS D TO SWITCH DEBUG MODE", bitmap_font)
@@ -30,7 +30,6 @@ class MyGame(ge.GameEngine):
         self.text_bitmap3.position = self.player.position + sf.Vector2(0, -18)
         self.text_bitmap4 = ge.BitmapText("PRESS F TO ENTER OR EXIT FULLSCREEN", bitmap_font)
         self.text_bitmap4.position = self.player.position + sf.Vector2(0, -60)
-        self.light_growing = True
 
         self.game_camera.follow(self.player)
         self.game_camera.scene = self.scene
@@ -41,21 +40,23 @@ class MyGame(ge.GameEngine):
         map_back_layer = ge.Layer("map_back", self.level.layers["back"])
         map_front_layer = ge.Layer("map_front", self.level.layers["front"])
         self.map_collisions_layer = ge.Layer("map_collisions", self.level.layers["collisions"])
-        entities_layer = ge.Layer("entities", self.player, self.text_bitmap, self.text_bitmap2, self.text_bitmap3, self.text_bitmap4)
+        texts_layers = ge.Layer("texts", self.text_bitmap, self.text_bitmap2, self.text_bitmap3, self.text_bitmap4)
+        entities_layer = ge.Layer("entities", self.player)
 
-        self.mask = ge.Mask("light", self.level.width * 16, self.level.height * 16, sf.Color(20, 10, 50, 255))
+        self.mask = ge.Mask("light", self.level.width * 16, self.level.height * 16, sf.Color(20, 10, 50, 220))
+        self.light_growing = True
         self.player_light = sf.CircleShape(33)
         self.player_light.fill_color = sf.Color(self.mask.fill_color.r, self.mask.fill_color.g, self.mask.fill_color.b, 50)
         self.player_light.position = self.player.position - sf.Vector2(0, 5)
         self.player_light2 = sf.CircleShape(50)
         self.player_light2.fill_color = sf.Color(self.mask.fill_color.r, self.mask.fill_color.g, self.mask.fill_color.b, 150)
-        self.player_light2.origin = (50, 60)
         self.player_light2.position = self.player.position - sf.Vector2(0, 5)
 
         self.mask.add(self.player_light2)
         self.mask.add(self.player_light)
 
-        self.scene.add_layer(entities_layer, 3)
+        self.scene.add_layer(entities_layer, 4)
+        self.scene.add_layer(texts_layers, 2)
         self.scene.add_layer(map_front_layer, 1)
         self.scene.add_layer(map_back_layer, 0)
 
@@ -90,7 +91,7 @@ class MyGame(ge.GameEngine):
                 if self.debug:
                     self.scene.remove_layer(layer=self.scene.get_layer("map_collisions"))
                 else:
-                    self.scene.add_layer(self.map_collisions_layer, 2)
+                    self.scene.add_layer(self.map_collisions_layer, 3)
                 self.debug = not self.debug
             elif event["code"] == ge.Keyboard.M:
                 self.minimap_camera.visible = not self.minimap_camera.visible
@@ -98,7 +99,7 @@ class MyGame(ge.GameEngine):
                 if self.scene.masks:
                     self.scene.remove_mask(self.mask)
                 else:
-                    self.scene.add_mask(self.mask)
+                    self.scene.add_mask(self.mask, 3)
 
     def update(self):
         super().update()

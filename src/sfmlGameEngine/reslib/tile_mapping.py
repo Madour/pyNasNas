@@ -1,9 +1,8 @@
 import xml.etree.ElementTree as Et
 from sfml import sf
-from . import textures_loader
 from ..data.game_obj import GameObject
 from ..data import rect
-from .resource_path import resource_path
+from .resource_path import find_resource
 from typing import List, Dict, Optional, Union
 
 
@@ -89,11 +88,12 @@ class MapLayer(GameObject, sf.Drawable):
 class TileMap(GameObject):
     def __init__(self, map_name):
         #print("--------------\n"+"---Loading map : ", map_name, "---")
+        TileSet.map = self
         AnimatedTile.map = self
         InterractionTile.map = self
 
         # tmx = Et.parse(resource_path(MAPS_DIR+map_name+'.tmx'))
-        tmx = Et.parse(map_name)
+        tmx = Et.parse(find_resource(map_name))
         self.root = tmx.getroot()
 
         self.name = map_name[:map_name.find('.')]
@@ -109,8 +109,6 @@ class TileMap(GameObject):
         self.tiles_list = []
         self.tiles_array = {}
         self.tilesets = {}
-
-        self.load()
 
     def load(self):
         # collect tilesets and their information and store it in self.tilesets
@@ -470,10 +468,11 @@ class InterractionTile(sf.Drawable):
 
 
 class TileSet:
+    map: TileMap = None
     def __init__(self, tileset_tag, tileset_id):
         # tileset externe dans un fichier tsx
         if tileset_tag.find('image') is None:
-            tsx = Et.parse(resource_path("assets/" + tileset_tag.get('source')))
+            tsx = Et.parse(find_resource("assets/" + tileset_tag.get('source')))
             root = tsx.getroot()
             self.external = True
         # tileset interne ( pas de tsx à charger)
@@ -493,11 +492,16 @@ class TileSet:
 
         # on récupere la source de l'image et crée la texture sfml
         self.source = root.find('image').get('source')
-        path = self.source[:self.source.find('.')].split("/")
-
-        res = textures_loader.TexturesLoader
-        for dir in path:
-            res = getattr(res, dir)
+        map_dir = self.map.name.split("\\")[1:-1]
+        tileset_path = self.source.split("/")
+        from . import Res
+        import os.path
+        res = Res
+        for dir in map_dir+tileset_path:
+            if dir == "..":
+                res = getattr(res, "parent")
+            else:
+                res = getattr(res, os.path.splitext(dir)[0])
         self.texture = res
 
         self.properties: Dict[int, Dict[str, Union[bool, int, float, str, sf.Color]]] = {}

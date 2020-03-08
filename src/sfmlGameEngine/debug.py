@@ -24,7 +24,7 @@ class DebugText(sf.Text):
         self.attr_name = attr_name
         self._float_round = float_round
         self.string = attr_name+" : "+str(getattr(instance, attr_name))
-        self.font = Res.fonts.arial
+        self.font = Res.Fonts.arial
         self.character_size = 16
         self.color = sf.Color.WHITE
         self.position = position

@@ -1,29 +1,51 @@
-from . import textures_loader, maps_loader, fonts_loader
+from .resource_loader import load_resources
+from .resource_path import find_resource, RES_DIR
+from typing import Union
+from sfml import sf
 
 
-class Res:
-    """A Resource manager. Automatically loads all resources found in `assets` directory
-
-    """
-
-    textures = textures_loader.TexturesLoader
-    "Stores all sf.Texture loaded from .png files"
-
-    maps = maps_loader.MapsLoader
-    "Store all ge.TileMap loaded from .tmx files"
-
-    fonts = fonts_loader.FontsLoader
-    "Store all sf.Font loaded from .ttf files"
+class ResMeta(type):
+    """A Resource manager. Automatically loads all resources found in `assets` directory"""
 
     ready = False
+    assets = resource_loader.Dir("assets")
+    assets._textures = resource_loader.Dir("textures")
+    assets._maps = resource_loader.Dir("maps")
+    assets._fonts = resource_loader.Dir("fonts")
 
+    @property
+    def Textures(cls):
+        return cls._textures
+
+    @property
+    def Maps(cls):
+        return cls._maps
+
+    @property
+    def Fonts(cls):
+        return cls._fonts
+
+    def __iter__(cls):
+        for x in cls.__dict__["assets"]:
+            yield x
+
+    def __getattr__(cls, item):
+        return getattr(cls.assets, item)
+
+
+class Res(metaclass=ResMeta):
     @classmethod
     def load(cls):
         """Load all resources into Res.
         You need to call this methode once at the start of your game (via GameEngine.load_resources() )
         if you want to use the resource manager.
         """
-        textures_loader.TexturesLoader.load()
-        maps_loader.MapsLoader.load()
-        fonts_loader.FontsLoader.load()
+
+        load_resources(cls.assets, find_resource(RES_DIR))
+        for asset in cls.assets.all_files():
+            if asset.__class__.__name__ == "TileMap":
+                asset.load()
         cls.ready = True
+
+
+

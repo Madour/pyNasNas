@@ -5,7 +5,7 @@ from sfml import sf
 class Sprites:
     character = ge.Sprite(
         name="adventurer",
-        texture=ge.Res.textures.adventurer,
+        texture=ge.Res.adventurer,
         anims={
             "idle": ge.Anim(
                 [

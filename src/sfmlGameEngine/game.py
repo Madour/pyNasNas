@@ -4,7 +4,7 @@ from os.path import join
 from .data.game_obj import GameObject
 from .data import const
 
-from .reslib.resource_path import resource_path, RES_DIR
+from .reslib.resource_path import find_resource, RES_DIR
 from .reslib import Res
 
 from . import camera
@@ -85,7 +85,7 @@ class GameEngine:
         """
         if loading_image:
             window = sf.RenderWindow(sf.VideoMode(160, 90), "Game Base", sf.Style.NONE)
-            l = sf.Sprite(sf.Texture.from_file(resource_path(join(RES_DIR, "loading.png"))))
+            l = sf.Sprite(sf.Texture.from_file(find_resource(join(RES_DIR, "loading.png"))))
             window.draw(l)
             window.display()
             Res.load()
