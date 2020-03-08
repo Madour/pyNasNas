@@ -1,7 +1,5 @@
 from .resource_loader import load_resources
 from .resource_path import find_resource, RES_DIR
-from typing import Union
-from sfml import sf
 
 
 class ResMeta(type):
