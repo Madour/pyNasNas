@@ -14,13 +14,9 @@ from .data.rect import Rect
 
 
 class GameEngine:
-    W_WIDTH = 160*6     # window width
-    W_HEIGHT = 90*6     # window height
-    V_WIDTH = 160*6     # view width
-    V_HEIGHT = 90*6     # view height
 
     def __init__(self, title: str = None, w_width: int = 960, w_height: int = 540,
-                 v_width: int = 320, v_height: int = 180, desired_fps: int = 60):
+                 v_width: int = 960, v_height: int = 540, desired_fps: int = 60):
         """
         Initializes the engine and creates:
             - a window
@@ -32,9 +28,12 @@ class GameEngine:
             w_height (int): window height
             v_width (int): game view width
             v_height (int): game view height
-            desired_fps (int):
+            desired_fps (int): desired fps
         """
         GameObject.game = self
+
+        self.W_WIDTH, self.W_HEIGHT = w_width, w_height
+        self.V_WIDTH, self.V_HEIGHT = v_width, v_height
 
         # Game name, displayed in window title
         if not title:
@@ -57,12 +56,14 @@ class GameEngine:
         # Scene is where everything is drawn on
         self.scene = self.create_scene(w_width, w_height)
 
-        # a camera used to keep aspect ratio of the game when the window is resized
+        # camera made to look at the GUI and HUD scene
         self.ui_camera = self.create_camera("default", 1, Rect((0, 0), (w_width, w_height)))
 
+        # game camera, usually looks at the main scene (world map, scrolling level ...)
         self.game_camera = self.create_camera("game", 0, Rect((0, 0), (v_width, v_height)))
 
-        self.minimap_camera = self.create_camera("nminimap", 2, Rect((0, 0), (v_width*3, v_height*3)), Rect((0.8, 0), (0.2, 0.2)))
+        # minimap, looks at the main scene but sees a larger area than the game camera
+        self.minimap_camera = self.create_camera("minimap", 2, Rect((0, 0), (v_width*3, v_height*3)), Rect((0.8, 0), (0.2, 0.2)))
         self.minimap_camera.frames_delay = 0
 
         # clock and dt used for FPS calculation
@@ -279,7 +280,7 @@ class GameEngine:
 
             self._render()
 
-            self.window.view = self.ui_camera
+            self.window.view = self.window.default_view
             if self.debug:
                 for txt in self.debug_texts:
                     txt.update()
