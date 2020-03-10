@@ -9,6 +9,7 @@ from .reslib import Res
 
 from . import camera
 from . import scenes
+from . import transitions
 from . import debug
 from .data.rect import Rect
 
@@ -57,7 +58,7 @@ class GameEngine:
         self.scene = self.create_scene(w_width, w_height)
 
         # camera made to look at the GUI and HUD scene
-        self.ui_camera = self.create_camera("default", 1, Rect((0, 0), (w_width, w_height)))
+        self.ui_camera = self.create_camera("default", 1, Rect((0, 0), (v_width, v_height)))
 
         # game camera, usually looks at the main scene (world map, scrolling level ...)
         self.game_camera = self.create_camera("game", 0, Rect((0, 0), (v_width, v_height)))

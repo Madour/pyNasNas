@@ -1,6 +1,6 @@
 from sfml import sf
 from .data.game_obj import GameObject
-from .data import rect
+from .data import rect, keys
 
 
 class BaseEntity(GameObject, sf.Drawable):
@@ -115,6 +115,13 @@ class PlatformerEntity(BaseEntity):
             if self.anims[self.state].frames_origin[0]:
                 self.sprite.origin = self.anims[self.state].frames_origin[0]
 
+        self.controls = {
+            'right': keys.Keyboard.RIGHT,
+            'left': keys.Keyboard.LEFT,
+            'up': keys.Keyboard.UP,
+            'down': keys.Keyboard.DOWN
+        }
+
         self.velocity = sf.Vector2(0, 0)
         self.jump_velocity = sf.Vector2(0, -18)
         self.gravity = sf.Vector2(0, 1)
@@ -125,9 +132,9 @@ class PlatformerEntity(BaseEntity):
         self.falling = True
 
     def jump(self):
-        # these 2 lines get the nearest collision box over the entity
         col_over = []
         if self.onground:
+            # these 2 lines get the nearest collision box over the entity
             self.game.level.collisions.sort(key=lambda b:abs(b.bottom-self.collision_box.top))
             col_over = [x for x in self.game.level.collisions if x.bottom < self.collision_box.top and x.left <= self.x <= x.right]
 

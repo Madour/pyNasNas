@@ -9,22 +9,24 @@ class Player(ge.entities.PlatformerEntity):
         self.jump_velocity = sf.Vector2(0, -15)
 
     def update(self, dt, inputs = None):
-        if ge.Keyboard.UP in inputs:
+        if self.controls['up'] in inputs:
             if self.remaining_jumps > 0 and not self.falling:
                 self.jump()
-            inputs.remove(ge.Keyboard.UP)
+            inputs.remove(self.controls['up'])
+
         if inputs:
-            if ge.Keyboard.DOWN in inputs and self.onground:
-                self.idle()
-            elif inputs[0] == ge.Keyboard.RIGHT:
-                self.walk_right()
-            elif inputs[0] == ge.Keyboard.LEFT:
-                self.walk_left()
-            else:
-                self.idle()
+            for key in inputs:
+                if key == self.controls['down'] and self.onground:
+                    self.idle()
+                    break
+                elif key == self.controls['right']:
+                    self.walk_right()
+                    break
+                elif key == self.controls['left']:
+                    self.walk_left()
+                    break
 
         else:
             self.idle()
-
 
         super().update(dt)
