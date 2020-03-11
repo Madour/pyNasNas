@@ -11,9 +11,17 @@ class Transition(sf.Drawable):
 
     def start(self):
         self.started = True
+        self.on_start()
+
+    def on_start(self):
+        pass
 
     def end(self):
         self.ended = True
+        self.on_end()
+
+    def on_end(self):
+        pass
 
     def update(self):
         pass

@@ -1,22 +1,22 @@
 from .data.game_obj import GameObject
 from . import layers
 from sfml import sf
-
+from typing import Dict
 
 class Scene(GameObject, sf.Drawable):
     def __init__(self, width: int, height: int):
         super().__init__()
-        self.render_texture = sf.RenderTexture(width, height)
-        self.sprite = sf.Sprite(self.render_texture.texture)
-        self.layers = {}
-        self.masks = {}
+        self.render_texture : sf.RenderTexture = sf.RenderTexture(width, height)
+        self.sprite : sf.Sprite = sf.Sprite(self.render_texture.texture)
+        self.layers : Dict[int, layers.Layer]= {}
+        self.masks : Dict[int, layers.Mask] = {}
 
     @property
-    def width(self):
+    def width(self) -> int:
         return self.render_texture.width
 
     @property
-    def height(self):
+    def height(self) -> int:
         return self.render_texture.height
 
     def add_layer(self, layer: layers.Layer, order: int):
@@ -60,10 +60,13 @@ class Scene(GameObject, sf.Drawable):
 
     def update(self):
         self.render_texture.clear(sf.Color.TRANSPARENT)
+
         max_layers_order = max(self.layers.keys()) if self.layers.keys() else 0
         max_masks_order = max(self.masks.keys()) if self.masks.keys() else 0
+
         for i in range(max(max_layers_order, max_masks_order)+1):
             if i in self.layers:
+                self.layers[i].update()
                 self.render_texture.draw(self.layers[i])
             if i in self.masks:
                 self.masks[i].update()

@@ -77,9 +77,14 @@ class MyGame(ge.GameEngine):
         minimap_bg.size = (0.2*self.ui_camera.size.x, 0.2*self.ui_camera.size.y)
         minimap_bg.position = (0.8*self.ui_camera.size.x, 0)
         minimap_bg.fill_color = sf.Color.BLACK
+
         self.tr_out = ge.FadeOut(self.ui_camera.size.x, self.ui_camera.size.y, 5)
+        self.tr_out.on_end = lambda : self.tr_in.start()
         self.tr_out.start()
+
         self.tr_in = ge.FadeIn(self.ui_camera.size.x, self.ui_camera.size.y, 5)
+        self.tr_in.on_start = lambda : print("Fade in started !")
+
         self.ui_scene.add_layer(ge.Layer("ui", minimap_bg, self.tr_out, self.tr_in), 1)
         self.ui_camera.scene = self.ui_scene
 
@@ -117,20 +122,17 @@ class MyGame(ge.GameEngine):
                     self.scene.add_mask(self.mask, 5)
 
     def update(self):
+
         super().update()
         self.level.layers["front"].update()
-
-        if self.tr_out.ended and not self.tr_in.started:
-            self.tr_in.start()
-            self.ui_scene.get_layer("ui").remove(self.tr_out)
         self.tr_out.update()
         self.tr_in.update()
 
         for layer in self.scene.layers.values():
             for ent in layer:
-                layer.ysort()
                 if isinstance(ent, ge.entities.BaseEntity):
                     ent.update(self.dt, self.inputs)
+            layer.ysort()
 
         if self.player_light.radius < 33 and self.light_growing:
             self.player_light.radius += 0.015
