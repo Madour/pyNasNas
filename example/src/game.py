@@ -42,7 +42,7 @@ class MyGame(ge.GameEngine):
         self.game_camera.follow(self.player2)
         self.game_camera.scene = self.scene
 
-        self.game_camera2 = self.create_camera("player2", 0.5, ge.Rect((0,0), (self.V_WIDTH/2, self.V_HEIGHT)), ge.Rect((0.5, 0), (0.5, 1)))
+        self.game_camera2 = self.create_camera("player2", 0, ge.Rect((0,0), (self.V_WIDTH/2, self.V_HEIGHT)), ge.Rect((0.5, 0), (0.5, 1)))
         self.game_camera2.follow(self.player)
         self.game_camera2.scene = self.scene
 

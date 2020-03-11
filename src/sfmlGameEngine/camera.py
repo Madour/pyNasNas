@@ -3,9 +3,10 @@ from .data.game_obj import GameObject
 
 
 class Camera(GameObject, sf.View):
-    def __init__(self, name):
+    def __init__(self, name, render_order):
         super().__init__()
         self.name = name
+        self.render_order = render_order
         self.reference = None
         self.frames_delay = 15
         self.base_pos = sf.Vector2(0, 0)

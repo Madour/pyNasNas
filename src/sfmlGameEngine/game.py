@@ -9,9 +9,10 @@ from .reslib import Res
 
 from . import camera
 from . import scenes
-from . import transitions
 from . import debug
 from .data.rect import Rect
+
+from typing import List
 
 
 class GameEngine:
@@ -48,11 +49,11 @@ class GameEngine:
         self.fullscreen = False
 
         # inputs from keyboard are stored in this list
-        self.inputs = []
+        self.inputs : List[int] = []
         # list of all cameras/view used in the game
-        self.cameras = {}
+        self.cameras : List[camera.Camera] = []
         # list of all scenes used in the game, usually 1 is enough
-        self.scenes = []
+        self.scenes : List[scenes.Scene] = []
 
         # Scene is where everything is drawn on
         self.scene = self.create_scene(w_width, w_height)
@@ -129,12 +130,12 @@ class GameEngine:
         Returns:
             Returns the created Camera.
         """
-        cam = camera.Camera(name)
+        cam = camera.Camera(name, order)
         cam.reset(camwindow.topleft, camwindow.size)
         cam.viewport = viewport
         cam.vp_base_size = viewport.size
         cam.vp_base_pos = viewport.topleft
-        self.cameras[order] = cam
+        self.cameras.append(cam)
         return cam
 
     def add_debug_text(self, instance:object, attr_name: str, position: tuple, float_round: int = None):
@@ -190,30 +191,17 @@ class GameEngine:
             viewport_h = (float(self.window.size.x) / (self.W_WIDTH / self.W_HEIGHT)) / float(self.window.size.y)
             viewport_x = 0
             viewport_y = (1-viewport_h)/2
-        for cam in self.cameras.values():
+        for cam in self.cameras:
             cam.viewport = sf.Rect(
                 (viewport_x + cam.vp_base_pos.x*(1-2*viewport_x), viewport_y + cam.vp_base_pos.y*(1-2*viewport_y)),
                 (viewport_w * cam.vp_base_size.x, viewport_h * cam.vp_base_size.y)
             )
 
-
-    def _key_handler(self, key: int, event_type: str):
-        """
-        Update inputs list.
-        Args:
-            key (int): code of a key.
-            event_type (str): equals "pressed" when a key is pressed or "released" when it is released.
-        """
-        if key not in self.inputs and event_type == "pressed":
-            self.inputs.insert(0, key)
-        else:
-            if key in self.inputs and event_type == "released":
-                self.inputs.remove(key)
-
     def _store_inputs(self, event: sf.Event):
         """
-        Add all pressed keys to self.inputs
+        Handles window close event.
         Calls self.scale_view() when the window is resized
+        Update inputs list.
 
         Args:
             event (sf.Event): a window event
@@ -221,9 +209,11 @@ class GameEngine:
         if event == sf.Event.CLOSED:
             self.window.close()
         elif event == sf.Event.KEY_PRESSED:
-            self._key_handler(event["code"], "pressed")
+            if event['code'] not in self.inputs:
+                self.inputs.insert(0, event['code'])
         elif event == sf.Event.KEY_RELEASED:
-            self._key_handler(event["code"], "released")
+            if event['code'] in self.inputs :
+                self.inputs.remove(event['code'])
         elif event == sf.Event.RESIZED:
             self.scale_view()
 
@@ -242,7 +232,9 @@ class GameEngine:
         Update all Cameras used.
         Override this method without forgetting to call super().update()
         """
-        for cam in self.cameras.values():
+        for scene in self.scenes:
+            scene.update()
+        for cam in self.cameras:
             cam.update(self.dt)
 
     def _render(self):
@@ -251,11 +243,8 @@ class GameEngine:
         Layer 0 will be drawn first, layer 1 will be drawn over layer 0 etc
         Internal usage only, do not override or call this method.
         """
-        for scene in self.scenes:
-            scene.update()
-
-        sorted_cameras = [cam for order, cam in sorted(self.cameras.items(), key=lambda item: item[0])]
-        for cam in sorted_cameras:
+        self.cameras.sort(key=lambda x:x.render_order)
+        for cam in self.cameras:
             if cam.visible:
                 self.window.view = cam
                 if cam.has_scene():

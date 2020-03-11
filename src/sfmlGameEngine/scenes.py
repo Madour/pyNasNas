@@ -36,10 +36,17 @@ class Scene(GameObject, sf.Drawable):
             if order in self.layers.keys():
                 self.layers.pop(order)
 
-    def get_layer(self, name: str) -> layers.Layer:
-        for order, layer in self.layers.items():
-            if layer.name == name:
-                return layer
+    def get_layer(self, name: str = None, order: int = None) -> layers.Layer:
+        for layer_order, layer in self.layers.items():
+            if name != None and order != None:
+                if self.layers[order].name != name:
+                    raise IndexError(f"Requested order {order} and name {name} does not match")
+            if name != None:
+                if layer.name == name:
+                    return layer
+            if order != None:
+                if layer_order == order:
+                    return layer
 
     def add_mask(self, mask: layers.Mask, order: int):
         if isinstance(mask, layers.Mask):
