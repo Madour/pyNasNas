@@ -1,6 +1,7 @@
 .idea
 .git
 doc
+wiki
 ignored
 __pycache__/
 *.py[cod]

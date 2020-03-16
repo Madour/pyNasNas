@@ -15,6 +15,7 @@ class MyGame(ge.GameEngine):
         self.window.framerate_limit = 60
 
         self.level = ge.Res.Maps.level
+        self.level.set_collisions_layer("collisions")
 
         self.scene = self.create_scene(self.level.width * 16, self.level.height * 16)
 

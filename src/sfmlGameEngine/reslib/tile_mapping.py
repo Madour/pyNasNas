@@ -292,7 +292,7 @@ class TileMap(GameObject):
                 width = int(box.get('width')) if  box.get('width') else 0
                 height = int(box.get('height')) if  box.get('height') else 0
                 self.objects[name].append( rect.Rect((x, y), (width, height)) )
-                if name == "collisions": self.collisions = self.objects[name]
+                #if name == "collisions": self.collisions = self.objects[name]
                 shape = sf.RectangleShape((width, height))
                 shape.position = (x, y)
                 shape.fill_color = color
@@ -300,6 +300,9 @@ class TileMap(GameObject):
             self.render_textures[layer_index].display()
             self.layers[name].sprite = sf.Sprite(self.render_textures[layer_index].texture)
             layer_index += 1
+
+    def set_collisions_layer(self, name):
+        self.collisions = self.objects[name]
 
     def get_tile_prop(self, x, y, layer, prop_name=None):
         tile_id = self.tiles_array[layer][y][x]
