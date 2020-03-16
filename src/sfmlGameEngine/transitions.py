@@ -36,6 +36,9 @@ class FadeIn(Transition):
         super().__init__(width, height)
         self.opacity = 255
         self.speed = speed
+        self.render_texture.clear(sf.Color(0, 0, 0, self.opacity))
+        self.render_texture.display()
+        self.sprite.texture = self.render_texture.texture
 
     def update(self):
         if self.started and not self.ended:
@@ -55,6 +58,9 @@ class FadeOut(Transition):
         super().__init__(width, height)
         self.opacity = 0
         self.speed = speed
+        self.render_texture.clear(sf.Color(0, 0, 0, self.opacity))
+        self.render_texture.display()
+        self.sprite.texture = self.render_texture.texture
 
     def update(self):
         if self.started and not self.ended:

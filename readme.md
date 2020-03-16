@@ -43,4 +43,6 @@ import src.sfmlGameEngine as ge
 
 #### How to use
 
-Take a look at the example project to see how to use it, a Get Started is comming soon.
+Visit the [wiki](https://github.com/Madour/pySFMLGameEngine/wiki) to learn how to use it.
+
+You can also take a look at the example project to see how to use it. 

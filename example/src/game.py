@@ -80,11 +80,10 @@ class MyGame(ge.GameEngine):
         minimap_bg.fill_color = sf.Color.BLACK
 
         self.tr_out = ge.FadeOut(self.ui_camera.size.x, self.ui_camera.size.y, 5)
-        self.tr_out.on_end = lambda : self.tr_in.start()
-        self.tr_out.start()
+        self.tr_out.on_end = lambda : self.window.close()
 
-        self.tr_in = ge.FadeIn(self.ui_camera.size.x, self.ui_camera.size.y, 5)
-        self.tr_in.on_start = lambda : print("Fade in started !")
+        self.tr_in = ge.FadeIn(self.ui_camera.size.x, self.ui_camera.size.y, 2)
+        self.tr_in.start()
 
         self.ui_scene.add_layer(ge.Layer("ui", minimap_bg, self.tr_out, self.tr_in), 1)
         self.ui_camera.scene = self.ui_scene
@@ -98,7 +97,7 @@ class MyGame(ge.GameEngine):
     def event_handler(self, event):
         if event == sf.Event.KEY_PRESSED:
             if event["code"] == sf.Keyboard.ESCAPE:
-                self.window.close()
+                self.tr_out.start()
             elif event["code"] == ge.Keyboard.R:
                 self.window.close()
                 self.__init__()
