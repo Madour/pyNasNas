@@ -18,7 +18,7 @@ from typing import List
 class GameEngine:
 
     def __init__(self, title: str = None, w_width: int = 960, w_height: int = 540,
-                 v_width: int = 960, v_height: int = 540, desired_fps: int = 60):
+                 v_width: int = 960, v_height: int = 540, fps: int = 60):
         """
         Initializes the engine and creates:
             - a window
@@ -43,7 +43,7 @@ class GameEngine:
         else:
             self.name = title
 
-        self.desired_fps = desired_fps
+        self.desired_fps = fps
         self.window = sf.RenderWindow(sf.VideoMode(w_width, w_height), self.name)
         self.window.framerate_limit = self.desired_fps
         self.fullscreen = False
