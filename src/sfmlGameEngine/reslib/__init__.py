@@ -57,8 +57,9 @@ class ResMeta(type):
         return cls._assets.all_files()
 
     def print_tree(cls):
-        print(f"{RES_DIR}")
+        print(f"\n{RES_DIR}")
         cls._assets.print_tree(indent=1)
+        print("")
 
 
 class Res(metaclass=ResMeta):

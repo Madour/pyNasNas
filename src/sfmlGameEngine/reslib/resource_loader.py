@@ -49,11 +49,12 @@ class Dir:
         self._data : Dict[str, Union[Dir, sf.Texture, tm.TileMap, sf.Font]] = {}
 
     def __getattr__(self, item):
+        print(item)
         if item[0] == '_':
             return self.__dict__[item]
         if item in self._data:
             return self._data[item]
-        raise AttributeError(f"File or directory '{item}' not found in directory '{self.name}'")
+        raise AttributeError(f"File or directory '{item}' not found in directory '{self._name}'")
 
     def __setattr__(self, key, value):
         if key not in vars(dict).keys():
@@ -90,10 +91,15 @@ class Dir:
         files.sort(key=lambda x:x[0])
 
         for name, val in dirs:
-            print(" " * 4 * indent, end='')
-            print(f"|_ {name} : {type(val).__name__}")
+            print(("│" + " " * 3) * (indent - 1), end='')
+            print("├" + "─", end='')
+            print(f" {name} : {type(val).__name__}")
             val.print_tree(indent=indent + 1)
 
         for name, val in files:
-            print(" " * 4 * indent, end='')
-            print(f"{name} : {type(val).__name__}")
+            print(("│" + " " * 3) * (indent - 1), end='')
+            if (name, val) == files[-1]:
+                print("└" + "─", end='')
+            else:
+                print("├" + "─", end='')
+            print(f" {name} : {type(val).__name__}")
