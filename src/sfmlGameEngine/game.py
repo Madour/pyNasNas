@@ -17,7 +17,7 @@ from typing import List
 
 class GameEngine:
 
-    def __init__(self, title: str = None, w_width: int = 960, w_height: int = 540,
+    def __init__(self, title: str = "pySFML Game Engine", w_width: int = 960, w_height: int = 540,
                  v_width: int = 960, v_height: int = 540, fps: int = 60):
         """
         Initializes the engine and creates:
@@ -38,10 +38,7 @@ class GameEngine:
         self.V_WIDTH, self.V_HEIGHT = v_width, v_height
 
         # Game name, displayed in window title
-        if not title:
-            self.name = "pySFML Game Engine"
-        else:
-            self.name = title
+        self.name = title
 
         self.desired_fps = fps
         self.window = sf.RenderWindow(sf.VideoMode(w_width, w_height), self.name)
