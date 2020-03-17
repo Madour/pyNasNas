@@ -49,7 +49,6 @@ class Dir:
         self._data : Dict[str, Union[Dir, sf.Texture, tm.TileMap, sf.Font]] = {}
 
     def __getattr__(self, item):
-        print(item)
         if item[0] == '_':
             return self.__dict__[item]
         if item in self._data:
