@@ -8,7 +8,7 @@ class BaseEntity(GameObject, sf.Drawable):
         super().__init__()
         self.data = data
         self.name = data.name
-        self.state = "idle"
+        self._state = "idle"
 
         self.anims = self.data.anims
 
@@ -31,8 +31,26 @@ class BaseEntity(GameObject, sf.Drawable):
         if self.anims is not None:
             self.anim_index = 0
             self.anim_clock = sf.Clock()
-            self.anim_counter = 0
             self.animate = True
+
+    @property
+    def state(self):
+        return  self._state
+
+    @state.setter
+    def state(self, value: str):
+        if self._state != value:
+            if value in self.anims:
+                self._state = value
+                self.anim_index = 0
+                self.anim_clock.restart()
+                self.sprite.texture_rectangle = self.anims[value].frames[0]
+                if self.anims[value].frames_origin:
+                    self.sprite.origin = self.anims[value].frames_origin[0]
+                else:
+                    self.sprite.origin = (0, 0)
+            else:
+                raise KeyError(f"Entity {self.name} has no animation state called {value}")
 
     @property
     def position(self):
@@ -161,23 +179,17 @@ class PlatformerEntity(BaseEntity):
                     self.velocity.x += 0.3
                 else:
                     self.velocity.x -= 0.3
-        if self.state != "idle":
-            self.state = "idle"
-            self.anim_index = 0
+        self.state = "idle"
 
     def walk_right(self):
         self.velocity.x = min(self.velocity.x + 0.5, 12)
         self.direction.x = 1
-        if self.state != "walk":
-            self.state = "walk"
-            self.anim_index = 0
+        self.state = "walk"
 
     def walk_left(self):
         self.velocity.x = max(self.velocity.x - 0.5, -12)
         self.direction.x = -1
-        if self.state != "walk":
-            self.state = "walk"
-            self.anim_index = 0
+        self.state = "walk"
 
     def update(self, dt: float, keys: list = None):
         if not self.onground:
