@@ -14,6 +14,8 @@ class BaseEntity(GameObject, sf.Drawable):
 
         self.sprite = sf.Sprite(self.data.texture)
         self.sprite.texture_rectangle = self.anims[self.state].frames[0]
+        if self.anims[self.state].frames_origin:
+            self.sprite.origin = self.anims[self.state].frames_origin[0]
         self.direction = sf.Vector2(1, 1)
 
         self.gx = self.sprite.position.x
