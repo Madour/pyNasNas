@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as Et
+import os
 from sfml import sf
 from ..data.game_obj import GameObject
 from ..data import rect
@@ -495,10 +496,10 @@ class TileSet:
 
         # on récupere la source de l'image et crée la texture sfml
         self.source = root.find('image').get('source')
-        map_dir = self.map.name.split("\\")[1:-1]
+        map_dir = self.map.name.split(os.sep)
+        map_dir = map_dir[map_dir.index('assets')+1:-1]
         tileset_path = self.source.split("/")
         from . import Res
-        import os.path
         res = Res
         for dir in map_dir+tileset_path:
             if dir == "..":
