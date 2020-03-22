@@ -75,7 +75,7 @@ class Res(metaclass=ResMeta):
     @classmethod
     def load(cls):
         """Load all resources into Res.
-        You need to call this methode once at the start of your game (via GameEngine.load_resources() )
+        You need to call this methode once at the start of your game (via App.load_resources() )
         if you want to use the resource manager.
         """
         cls._assets._parent = cls

@@ -16,7 +16,7 @@ from .data.rect import Rect
 from typing import List
 
 
-class GameEngine:
+class App:
 
     def __init__(self, title: str = "pySFML Game Engine", w_width: int = 960, w_height: int = 540,
                  v_width: int = 960, v_height: int = 540, fps: int = 60):

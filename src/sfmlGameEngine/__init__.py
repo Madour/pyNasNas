@@ -1,4 +1,4 @@
-from .game import GameEngine, Res, RES_DIR
+from .game import App, Res, RES_DIR
 from . import entities
 from .sprites import Anim, Sprite
 from .layers import Layer, Mask

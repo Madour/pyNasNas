@@ -2,12 +2,12 @@ from sfml import sf
 import src.sfmlGameEngine as ge
 
 # always call this static method before you do anything if you want to use the resource manage Res
-ge.GameEngine.load_resources(True)
+ge.App.load_resources(True)
 
 from example.src import entities
 
 
-class MyGame(ge.GameEngine):
+class MyGame(ge.App):
     def __init__(self):
         super().__init__("pySFML Game Engine - Example Game", 960, 576, 320, 192, 60)
         self.window.key_repeat_enabled = False
