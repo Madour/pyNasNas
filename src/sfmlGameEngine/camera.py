@@ -1,5 +1,6 @@
 from sfml import sf
 from .data.game_obj import GameObject
+from typing import Tuple, Union
 
 
 class Camera(GameObject, sf.View):
@@ -16,18 +17,33 @@ class Camera(GameObject, sf.View):
         self.visible = True
         self._scene = []
 
-    def reset(self, position: tuple, size: tuple):
-        if type(position) in [tuple, sf.Vector2]:
-            if isinstance(position, tuple):
-                super().reset(sf.Rect(position, size))
+    def reset(self, position: Union[sf.Vector2, tuple], size: Union[sf.Vector2, tuple]):
+        if type(position) in [sf.Vector2, tuple] and type(size) in [sf.Vector2, tuple]:
+            super().reset(sf.Rect(position, size))
+            if isinstance(position, sf.Vector2):
                 self.base_pos = position
-                self.base_size = sf.Vector2(size[0], size[1])
-            elif isinstance(position, sf.Vector2):
-                super().reset(sf.Rect(position, size))
-                self.base_pos = position
+            else:
+                self.base_pos = sf.Vector2(position[0], position[1])
+            if isinstance(size, sf.Vector2):
                 self.base_size = size
+            else:
+                self.base_size = sf.Vector2(size[0], size[1])
         else:
-            raise TypeError("position argument of Camera.reset() should be a tuple.")
+            raise TypeError("position and size arguments of Camera.reset() should be a sf.Vector or tuple.")
+
+    def reset_viewport(self,position: Union[sf.Vector2, tuple], size: Union[sf.Vector2, tuple]):
+        if type(position) in [sf.Vector2, tuple] and type(size) in [sf.Vector2, tuple]:
+            self.viewport = sf.Rect(position, size)
+            if isinstance(position, sf.Vector2):
+                self.vp_base_pos = position
+            else:
+                self.vp_base_pos = sf.Vector2(position[0], position[1])
+            if isinstance(size, sf.Vector2):
+                self.vp_base_size = size
+            else:
+                self.vp_base_size = sf.Vector2(size[0], size[1])
+        else:
+            raise TypeError("position and size arguments of Camera.reset_viewport() should be a sf.Vector or tuple.")
 
     @property
     def scene(self):

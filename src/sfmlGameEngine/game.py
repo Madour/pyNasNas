@@ -10,6 +10,7 @@ from .reslib import Res
 from . import camera
 from . import scenes
 from . import debug
+from . import transitions
 from .data.rect import Rect
 
 from typing import List
@@ -41,16 +42,18 @@ class GameEngine:
         self.name = title
 
         self.desired_fps = fps
-        self.window = sf.RenderWindow(sf.VideoMode(w_width, w_height), self.name)
+        self._window = sf.RenderWindow(sf.VideoMode(w_width, w_height), self.name)
         self.window.framerate_limit = self.desired_fps
-        self.fullscreen = False
+        self._fullscreen = False
 
         # inputs from keyboard are stored in this list
-        self.inputs : List[int] = []
+        self._inputs : List[int] = []
         # list of all cameras/view used in the game
-        self.cameras : List[camera.Camera] = []
+        self._cameras : List[camera.Camera] = []
         # list of all scenes used in the game, usually 1 is enough
-        self.scenes : List[scenes.Scene] = []
+        self._scenes : List[scenes.Scene] = []
+        # list of all playing transitions
+        self._transitions : List[transitions.Transition] = []
 
         # Scene is where everything is drawn on
         self.scene = self.create_scene(w_width, w_height)
@@ -74,6 +77,25 @@ class GameEngine:
 
         self.scale_view()
 
+    @property
+    def window(self):
+        return self._window
+    @property
+    def fullscreen(self):
+        return self._fullscreen
+    @property
+    def inputs(self):
+        return self._inputs
+    @property
+    def cameras(self):
+        return self._cameras
+    @property
+    def scenes(self):
+        return self._scenes
+    @property
+    def transitions(self):
+        return self._transitions
+
     @staticmethod
     def load_resources(loading_image: bool = False):
         """
@@ -92,7 +114,7 @@ class GameEngine:
         else:
             Res.load()
 
-    def create_scene(self, width: int, height: int) -> scenes.Scene:
+    def create_scene(self, width: int, height: int):
         """
         Creates a new Scene and returns it.
 
@@ -129,9 +151,7 @@ class GameEngine:
         """
         cam = camera.Camera(name, order)
         cam.reset(camwindow.topleft, camwindow.size)
-        cam.viewport = viewport
-        cam.vp_base_size = viewport.size
-        cam.vp_base_pos = viewport.topleft
+        cam.reset_viewport(viewport.topleft, viewport.size)
         self.cameras.append(cam)
         return cam
 
@@ -154,29 +174,29 @@ class GameEngine:
         else:
             self.debug_texts.append(debug.DebugText(instance, attr_name, position))
 
-    def enter_fullscreen(self):
-        self.window.close()
-        self.window = sf.RenderWindow(sf.VideoMode(const.SCREEN_W, const.SCREEN_H), self.name, sf.Style.NONE)
-        self.window.framerate_limit = self.desired_fps
-        self.window.mouse_cursor_visible = False
-        self.window.vertical_synchronization = True
-        self.fullscreen = True
-        self.scale_view()
-
-    def quit_fullscreen(self):
-        self.window.close()
-        self.window = sf.RenderWindow(sf.VideoMode(self.W_WIDTH, self.W_HEIGHT), self.name, sf.Style.DEFAULT)
-        self.window.framerate_limit = self.desired_fps
-        self.window.mouse_cursor_visible = True
-        self.window.vertical_synchronization = True
-        self.fullscreen = False
-        self.scale_view()
+    def toggle_fullscreen(self):
+        if not self.fullscreen:
+            self.window.close()
+            self._window = sf.RenderWindow(sf.VideoMode(const.SCREEN_W, const.SCREEN_H), self.name, sf.Style.NONE)
+            self.window.framerate_limit = self.desired_fps
+            self.window.mouse_cursor_visible = False
+            self.window.vertical_synchronization = True
+            self._fullscreen = True
+            self.scale_view()
+        else:
+            self.window.close()
+            self._window = sf.RenderWindow(sf.VideoMode(self.W_WIDTH, self.W_HEIGHT), self.name, sf.Style.DEFAULT)
+            self.window.framerate_limit = self.desired_fps
+            self.window.mouse_cursor_visible = True
+            self.window.vertical_synchronization = True
+            self._fullscreen = False
+            self.scale_view()
 
     def scale_view(self):
         """
-        Scales all Cameras to keep a good apsect ratio and avoid deformation when resizing the window.
+        Scales all Cameras to keep a good aspect ratio and avoid deformation when resizing the window.
         """
-        # larger than usual window
+        # wider than usual window
         if float(self.window.size.x) / float(self.window.size.y) > self.W_WIDTH / self.W_HEIGHT:
             viewport_w = (float(self.window.size.y) * (self.W_WIDTH / self.W_HEIGHT)) / float(self.window.size.x)
             viewport_h = 1

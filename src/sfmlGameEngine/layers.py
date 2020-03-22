@@ -44,7 +44,11 @@ class Layer(GameObject, sf.Drawable):
 
     def draw(self, target, states):
         for drawable in self._drawables:
-            target.draw(drawable, states)
+            if isinstance(drawable, transitions.Transition):
+                if drawable.started:
+                    target.draw(drawable, states)
+            else:
+                target.draw(drawable, states)
 
     def __iter__(self):
         return iter(self._drawables)

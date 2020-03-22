@@ -79,10 +79,10 @@ class MyGame(ge.GameEngine):
         minimap_bg.position = (0.8*self.ui_camera.size.x, 0)
         minimap_bg.fill_color = sf.Color.BLACK
 
-        self.tr_out = ge.FadeOut(self.ui_camera.size.x, self.ui_camera.size.y, 5)
+        self.tr_out = ge.transitions.CircleClose(self.ui_camera.size.x, self.ui_camera.size.y, 5)
         self.tr_out.on_end = lambda : self.window.close()
 
-        self.tr_in = ge.FadeIn(self.ui_camera.size.x, self.ui_camera.size.y, 2)
+        self.tr_in = ge.transitions.CircleOpen(self.ui_camera.size.x, self.ui_camera.size.y, 2)
         self.tr_in.start()
 
         self.ui_scene.add_layer(ge.Layer("ui", minimap_bg, self.tr_out, self.tr_in), 1)
@@ -103,10 +103,7 @@ class MyGame(ge.GameEngine):
                 self.__init__()
                 self.run()
             elif event["code"] == ge.Keyboard.F:
-                if not self.fullscreen:
-                    self.enter_fullscreen()
-                else:
-                    self.quit_fullscreen()
+                self.toggle_fullscreen()
             elif event["code"] == ge.Keyboard.G:
                 if self.debug:
                     self.scene.remove_layer(layer=self.scene.get_layer("map_collisions"))
