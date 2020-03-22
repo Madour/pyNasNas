@@ -14,8 +14,11 @@
  - [x] Transitions
  
 #### To do :
- - [ ] Menus
- - [ ] Particle systems
+ - [ ] Menus and UI
+ - [ ] Splash screens
+ - [ ] Levels and game events management
+ - [ ] In-game command line for debugging
+ - [ ] Particles system
 
 
 #### Install
