@@ -47,4 +47,4 @@ Visit the [wiki](https://github.com/Madour/pySFMLGameEngine/wiki) to learn how t
 
 You can also take a look at the example project to see how to use it.
 
-WARNING : be sure to run run_example.py from example folder like this : `python3 ../run_example.py`
+Be sure to run run_example.py from example folder like this : `python3 ../run_example.py`
