@@ -18,8 +18,8 @@ from typing import List
 
 class App:
 
-    def __init__(self, title: str = "pySFML Game Engine", w_width: int = 960, w_height: int = 540,
-                 v_width: int = 960, v_height: int = 540, fps: int = 60):
+    def __init__(self, title: str = "NasNas game", w_width: int = 960, w_height: int = 540,
+                 v_width: float = 960, v_height: float = 540, fps: int = 60):
         """
         Initializes the engine and creates:
             - a window
@@ -32,6 +32,7 @@ class App:
             v_width (int): game view width
             v_height (int): game view height
             desired_fps (int): desired fps
+
         """
         GameObject.game = self
 
@@ -73,7 +74,7 @@ class App:
         self.dt = 0
 
         self.debug = True
-        self.debug_texts = []  #: list of DebugText
+        self.debug_texts = []  # list of DebugText
 
         self.scale_view()
 
@@ -182,6 +183,7 @@ class App:
             self.window.mouse_cursor_visible = False
             self.window.vertical_synchronization = True
             self._fullscreen = True
+            self._inputs = []
             self.scale_view()
         else:
             self.window.close()
@@ -190,6 +192,7 @@ class App:
             self.window.mouse_cursor_visible = True
             self.window.vertical_synchronization = True
             self._fullscreen = False
+            self._inputs = []
             self.scale_view()
 
     def scale_view(self):
@@ -236,7 +239,7 @@ class App:
 
     def event_handler(self, event: sf.Event):
         """
-        event_handler is called evry time there is an event happening (key pressed, mouse move, lost focus ...)
+        event_handler is called every time there is an event happening (key pressed, mouse move, lost focus ...)
         Override this method to make your own event handling
 
         Args:

@@ -5,6 +5,8 @@ import math
 
 class Transition(GameObject, sf.Drawable):
     def __init__(self, width, height):
+        if self.__class__.__name__ == __class__.__name__:
+            raise NotImplementedError("Transition class is not instantiable. Please use inheritance to create a Transition.")
         super().__init__()
         self.render_texture = sf.RenderTexture(width, height)
         self.r = self.g = self.b = 0
@@ -53,7 +55,7 @@ class Transition(GameObject, sf.Drawable):
 
 
 class FadeIn(Transition):
-    """ Transition from black screen to transparent"""
+    """ Fade transition from black screen to transparent"""
     def __init__(self, width, height, speed=5):
         super().__init__(width, height)
         self.a = 255
@@ -69,7 +71,7 @@ class FadeIn(Transition):
 
 
 class FadeOut(Transition):
-    """ Transition from transparent to black screen"""
+    """ Fade transition from transparent to black screen"""
     def __init__(self, width, height, speed=5):
         super().__init__(width, height)
         self.a = 0
@@ -85,6 +87,7 @@ class FadeOut(Transition):
 
 
 class CircleClose(Transition):
+    """ Closing circle transition"""
     def __init__(self, width, height, speed=5):
         super().__init__(width, height)
         self.speed = speed

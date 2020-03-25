@@ -1,9 +1,9 @@
-import src.sfmlGameEngine as ge
+import src.NasNas as ns
 from sfml import sf
 from example.src.data.sprites import Sprites
 
 
-class Player(ge.entities.PlatformerEntity):
+class Player(ns.entities.PlatformerEntity):
     def __init__(self):
         super().__init__(Sprites.character)
         self.jump_velocity = sf.Vector2(0, -15)

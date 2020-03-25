@@ -1,5 +1,5 @@
-# pySFML Game Engine
-### A simple game engine to get started quickly with python and sfml.
+# NasNas
+### A simple game framework to get started quickly with python and sfml.
 
 #### Features :
  - [x] Automatic resource loader and  manager system
@@ -31,17 +31,17 @@ YourProject
     main.py
 ```
 
-Download the repository and copy the sfmlGameEngine folder into your project src folder.
+Download the repository and copy the NasNas folder into your project src folder.
 ```
 YourProject
     |_ assets
     |_ src
-        |_ sfmlGameEngine
+        |_ NasNas
     main.py
 ```
-Then you can, import the engine with:
+Then you can, import the framework with:
  ```python 
-import src.sfmlGameEngine as ge
+import src.NasNas as ns
 ```
 
 #### How to use

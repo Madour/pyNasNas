@@ -5,7 +5,7 @@ class Anim:
 
         - texture rectangle       (rect.Rect or sf.Rect instance)
         - duration for each frame (list of int)
-        - origin of the frame ((0,0) by default )
+        - origin of the frame     ((0,0) by default )
 
     You can also specify if the animation should loop or not (True by default)
     """

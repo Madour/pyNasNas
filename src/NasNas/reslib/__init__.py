@@ -67,7 +67,7 @@ class Res(metaclass=ResMeta):
     A Resource manager. Automatically loads all resources found in `assets` directory
     To access a resource, you can use : `Res.folder_name.resource_name`
     Res loads all assets recursively, so you can access nested directories this way :
-    `Res.folder1.folder2.foldeer3.resource_name`
+        `Res.folder1.folder2.folder3.resource_name`
     Res.Textures contains all textures at the same level.
     Res.Maps contains all tiled maps.
     Res.Fonts contains all fonts.
@@ -75,7 +75,7 @@ class Res(metaclass=ResMeta):
     @classmethod
     def load(cls):
         """Load all resources into Res.
-        You need to call this methode once at the start of your game (via App.load_resources() )
+        You need to call this method once at the start of your game
         if you want to use the resource manager.
         """
         cls._assets._parent = cls

@@ -1,13 +1,13 @@
-import src.sfmlGameEngine as ge
+import src.NasNas as ns
 from sfml import sf
 
 
 class Sprites:
-    character = ge.Sprite(
+    character = ns.Sprite(
         name="adventurer",
-        texture=ge.Res.adventurer,
+        texture=ns.Res.adventurer,
         anims={
-            "idle": ge.Anim(
+            "idle": ns.Anim(
                 [
                     sf.Rect((14, 7), (19, 29)),
                     sf.Rect((66, 6), (17, 30)),
@@ -20,7 +20,7 @@ class Sprites:
                 [ (11, 29), (9, 30), (10, 30), (12, 29), (10, 30), (9, 30)],
                 loop=True
             ),
-            "walk": ge.Anim(
+            "walk": ns.Anim(
                 [
                     sf.Rect((67, 45), (20, 28)),
                     sf.Rect((117, 46), (20, 27)),
