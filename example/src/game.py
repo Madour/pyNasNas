@@ -82,7 +82,7 @@ class MyGame(ns.App):
         self.tr_out = ns.transitions.CircleClose(self.ui_camera.size.x, self.ui_camera.size.y, 5)
         self.tr_out.on_end = lambda : self.window.close()
 
-        self.tr_in = ns.transitions.CircleOpen(self.ui_camera.size.x, self.ui_camera.size.y, 2)
+        self.tr_in = ns.transitions.CircleOpen(self.ui_camera.size.x, self.ui_camera.size.y, 3)
         self.tr_in.start()
 
         self.ui_scene.add_layer(ns.Layer("ui", minimap_bg, self.tr_out, self.tr_in), 1)
@@ -93,6 +93,8 @@ class MyGame(ns.App):
         self.add_debug_text(self.player, "remaining_jumps", (150, 0))
         self.add_debug_text(self, "inputs", (0, 16))
         self.add_debug_text(self.player, "velocity", (0, 32))
+        self.add_debug_text(self.player, "jumping", (150, 32))
+        self.add_debug_text(self.player, "falling", (300, 32))
 
     def event_handler(self, event):
         if event == sf.Event.KEY_PRESSED:
@@ -112,6 +114,8 @@ class MyGame(ns.App):
                 self.debug = not self.debug
             elif event["code"] == ns.Keyboard.M:
                 self.minimap_camera.visible = not self.minimap_camera.visible
+                self.game_camera.quake(duration=5, amplitude=2)
+                self.game_camera2.quake(5, 2)
             elif event["code"] == ns.Keyboard.L:
                 if self.scene.masks:
                     self.scene.remove_mask(self.mask)
@@ -119,8 +123,6 @@ class MyGame(ns.App):
                     self.scene.add_mask(self.mask, 5)
 
     def update(self):
-
-        super().update()
         self.level.layers["front"].update()
         self.tr_out.update()
         self.tr_in.update()

@@ -8,14 +8,14 @@ class BaseEntity(GameObject, sf.Drawable):
         super().__init__()
         self.data = data
         self.name = data.name
-        self._state = "idle"
+        self._anim_state = "idle"
 
         self.anims = self.data.anims
 
         self.sprite = sf.Sprite(self.data.texture)
-        self.sprite.texture_rectangle = self.anims[self.state].frames[0]
-        if self.anims[self.state].frames_origin:
-            self.sprite.origin = self.anims[self.state].frames_origin[0]
+        self.sprite.texture_rectangle = self.anims[self.anim_state].frames[0]
+        if self.anims[self.anim_state].frames_origin:
+            self.sprite.origin = self.anims[self.anim_state].frames_origin[0]
         self.direction = sf.Vector2(1, 1)
 
         self.gx = self.sprite.position.x
@@ -36,14 +36,14 @@ class BaseEntity(GameObject, sf.Drawable):
             self.animate = True
 
     @property
-    def state(self):
-        return  self._state
+    def anim_state(self):
+        return  self._anim_state
 
-    @state.setter
-    def state(self, value: str):
-        if self._state != value:
+    @anim_state.setter
+    def anim_state(self, value: str):
+        if self._anim_state != value:
             if value in self.anims:
-                self._state = value
+                self._anim_state = value
                 self.anim_index = 0
                 self.anim_clock.restart()
                 self.sprite.texture_rectangle = self.anims[value].frames[0]
@@ -52,7 +52,7 @@ class BaseEntity(GameObject, sf.Drawable):
                 else:
                     self.sprite.origin = (0, 0)
             else:
-                raise KeyError(f"Entity {self.name} has no animation state called {value}")
+                raise KeyError(f"Entity {self.name} has no animation anim_state called {value}")
 
     @property
     def position(self):
@@ -103,26 +103,26 @@ class BaseEntity(GameObject, sf.Drawable):
 
     def update_anim(self):
         ended = False
-        if self.anim_clock.elapsed_time.milliseconds >= self.anims[self.state].frames_duration[self.anim_index]:
+        if self.anim_clock.elapsed_time.milliseconds >= self.anims[self.anim_state].frames_duration[self.anim_index]:
             self.anim_index += 1
-            if self.anim_index >= self.anims[self.state].frames_count:
-                if self.anims[self.state].loop:
+            if self.anim_index >= self.anims[self.anim_state].frames_count:
+                if self.anims[self.anim_state].loop:
                     self.anim_index = 0
                 else:
                     ended = True
                     self.anim_index -= 1
 
             if not ended:
-                self.sprite.texture_rectangle = self.anims[self.state].frames[self.anim_index]
+                self.sprite.texture_rectangle = self.anims[self.anim_state].frames[self.anim_index]
                 # adjusting sprite origin based on the new texture_rectangle
-                if self.anims[self.state].frames_origin:
-                    if self.anims[self.state].frames_origin[self.anim_index]:
-                        self.sprite.origin = self.anims[self.state].frames_origin[self.anim_index]
+                if self.anims[self.anim_state].frames_origin:
+                    if self.anims[self.anim_state].frames_origin[self.anim_index]:
+                        self.sprite.origin = self.anims[self.anim_state].frames_origin[self.anim_index]
 
             self.anim_clock.restart()
 
-    def draw(self, target, states):
-        target.draw(self.sprite, states)
+    def draw(self, target, anim_states):
+        target.draw(self.sprite, anim_states)
         if self.game.debug:
             target.draw(self.collision_box_shape)
 
@@ -131,9 +131,9 @@ class PlatformerEntity(BaseEntity):
     def __init__(self, data):
         super().__init__(data)
         self.sprite.origin = (self.sprite.texture_rectangle.width / 2, self.sprite.texture_rectangle.height)
-        if self.anims[self.state].frames_origin:
-            if self.anims[self.state].frames_origin[0]:
-                self.sprite.origin = self.anims[self.state].frames_origin[0]
+        if self.anims[self.anim_state].frames_origin:
+            if self.anims[self.anim_state].frames_origin[0]:
+                self.sprite.origin = self.anims[self.anim_state].frames_origin[0]
 
         self.controls = {
             'right': keys.Keyboard.RIGHT,
@@ -165,10 +165,11 @@ class PlatformerEntity(BaseEntity):
             self.remaining_jumps -= 1
 
     def land(self):
-        self.jumping = False
-        self.onground = True
-        self.falling = False
-        self.remaining_jumps = self.jump_count
+        if not self.onground:
+            self.jumping = False
+            self.onground = True
+            self.falling = False
+            self.remaining_jumps = self.jump_count
 
     def idle(self):
         if -0.05 < self.velocity.x < 0.05:
@@ -181,17 +182,17 @@ class PlatformerEntity(BaseEntity):
                     self.velocity.x += 0.3
                 else:
                     self.velocity.x -= 0.3
-        self.state = "idle"
+        self.anim_state = "idle"
 
     def walk_right(self):
         self.velocity.x = min(self.velocity.x + 0.5, 12)
         self.direction.x = 1
-        self.state = "walk"
+        self.anim_state = "walk"
 
     def walk_left(self):
         self.velocity.x = max(self.velocity.x - 0.5, -12)
         self.direction.x = -1
-        self.state = "walk"
+        self.anim_state = "walk"
 
     def update(self, dt: float, keys: list = None):
         if not self.onground:
@@ -220,6 +221,7 @@ class PlatformerEntity(BaseEntity):
         while self.rx < 0: self.rx += 1; self.gx -= 1
 
         self.ry += self.velocity.y * dt
+        bot_collision = False
         for box in self.game.level.collisions:
             if box.left / 16 <= self.gx < (box.right) / 16:
                 # top collision
@@ -233,10 +235,10 @@ class PlatformerEntity(BaseEntity):
                     self.ry = 0.99
                     self.velocity.y = 0
                     self.land()
+                    bot_collision = True
                     break
-            else:
-                self.onground = False
-
+        if not bot_collision:
+            self.onground = False
         while self.ry > 1: self.ry -= 1; self.gy += 1
         while self.ry < 0: self.ry += 1; self.gy -= 1
 

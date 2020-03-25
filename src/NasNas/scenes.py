@@ -58,7 +58,7 @@ class Scene(GameObject, sf.Drawable):
         if mask in self.masks.values():
             self.masks = {key:val for key,val in self.masks.items() if val != mask}
 
-    def update(self):
+    def _render(self):
         self.render_texture.clear(sf.Color.TRANSPARENT)
 
         max_layers_order = max(self.layers.keys()) if self.layers.keys() else 0

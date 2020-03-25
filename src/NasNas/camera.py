@@ -1,6 +1,7 @@
 from sfml import sf
+import random as rand
 from .data.game_obj import GameObject
-from typing import Tuple, Union
+from typing import Union, Optional
 
 
 class Camera(GameObject, sf.View):
@@ -9,12 +10,14 @@ class Camera(GameObject, sf.View):
         self.name = name
         self.render_order = render_order
         self.reference = None
+        self.state = CameraState()
         self.frames_delay = 15
         self.base_pos = sf.Vector2(0, 0)
         self.base_size = sf.Vector2(0, 0)
         self.vp_base_pos = sf.Vector2(0, 0)
         self.vp_base_size = sf.Vector2(1, 1)
-        self.visible = True
+        self.offset = sf.Vector2(0, 0)
+        self.visible : bool = True
         self._scene = []
 
     def reset(self, position: Union[sf.Vector2, tuple], size: Union[sf.Vector2, tuple]):
@@ -104,12 +107,14 @@ class Camera(GameObject, sf.View):
     def follow(self, entity):
         self.reference = entity
 
-    def look_at(self, position: tuple):
-        self.center = position
+    def quake(self, duration: float, amplitude: int, horizontal:bool=True, vertical:bool=True):
+        self.state = QuakeState(duration, amplitude, horizontal, vertical)
 
     def update(self, dt):
+        self.move( - self.offset.x, - self.offset.y)
+
         if self.reference:
-            dif = self.reference.position - self.center
+            dif = self.reference.position - self.center - self.offset
             if self.frames_delay > 0:
                 self.move(dif.x/self.frames_delay, dif.y/self.frames_delay)
                 if self.left < 0:
@@ -123,3 +128,46 @@ class Camera(GameObject, sf.View):
                     self.bottom = self.game.level.height*16
             else:
                 self.center = self.reference.position
+
+        self.offset = self.state.offset
+        self.move(self.offset.x, self.offset.y)
+
+        if self.state.expired:
+            self.state = CameraState()
+
+
+class CameraState:
+    def __init__(self):
+        self.name = "idle"
+        self.timer = sf.Clock()
+        self.duration: Optional[float] = None
+
+    @property
+    def offset(self) -> sf.Vector2:
+        return sf.Vector2(0, 0)
+
+    @property
+    def expired(self) -> bool:
+        if not self.duration:
+            return False
+        return self.timer.elapsed_time.seconds >= self.duration
+
+
+class QuakeState(CameraState):
+    def __init__(self, duration:float, amplitude:int, horizontal:bool=True, vertical:bool=True):
+        super().__init__()
+        self.name = "quake"
+        self.duration = duration
+        self.amplitude = amplitude
+        self.direction = sf.Vector2(0, 0)
+        self.direction.x = 1 if horizontal else 0
+        self.direction.y = 1 if vertical else 0
+
+    @property
+    def offset(self) -> sf.Vector2:
+        ratio = 1 - self.timer.elapsed_time.seconds/self.duration
+        offx = rand.randrange(-self.amplitude, self.amplitude, 1)
+        offy = rand.randrange(-self.amplitude, self.amplitude, 1)
+        return sf.Vector2(offx*self.direction.x*ratio, offy*self.direction.y*ratio)
+
+

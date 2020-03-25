@@ -249,13 +249,8 @@ class App:
 
     def update(self):
         """
-        Update all Cameras used.
-        Override this method without forgetting to call super().update()
+        Write here your game logic
         """
-        for scene in self.scenes:
-            scene.update()
-        for cam in self.cameras:
-            cam.update(self.dt)
 
     def _render(self):
         """
@@ -263,6 +258,10 @@ class App:
         Layer 0 will be drawn first, layer 1 will be drawn over layer 0 etc
         Internal usage only, do not override or call this method.
         """
+        for scene in self.scenes:
+            scene._render()
+        for cam in self.cameras:
+            cam.update(self.dt)
         self.cameras.sort(key=lambda x:x.render_order)
         for cam in self.cameras:
             if cam.visible:
