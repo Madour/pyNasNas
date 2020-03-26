@@ -12,7 +12,6 @@ class MyGame(ns.App):
         super().__init__("pySFML Game Engine - Example Game", 960, 576, 320, 192, 60)
         self.window.key_repeat_enabled = False
         self.window.vertical_synchronization = True
-        self.window.framerate_limit = 60
 
         self.level = ns.Res.Maps.level
         self.level.set_collisions_layer("collisions")
@@ -79,18 +78,18 @@ class MyGame(ns.App):
         minimap_bg.position = (0.8*self.ui_camera.size.x, 0)
         minimap_bg.fill_color = sf.Color.BLACK
 
-        self.tr_out = ns.transitions.CircleClose(self.ui_camera.size.x, self.ui_camera.size.y, 5)
+        self.tr_out = ns.transitions.CircleClose(speed=5)
         self.tr_out.on_end = lambda : self.window.close()
 
-        self.tr_in = ns.transitions.CircleOpen(self.ui_camera.size.x, self.ui_camera.size.y, 3)
+        self.tr_in = ns.transitions.CircleOpen(speed=3)
         self.tr_in.start()
 
-        self.ui_scene.add_layer(ns.Layer("ui", minimap_bg, self.tr_out, self.tr_in), 1)
+        self.ui_scene.add_layer(ns.Layer("ui", minimap_bg), 1)
         self.ui_camera.scene = self.ui_scene
 
         self.debug = False
         self.add_debug_text(self.player, "onground", (0, 0))
-        self.add_debug_text(self.player, "remaining_jumps", (150, 0))
+        self.add_debug_text(self, "transitions", (150, 0))
         self.add_debug_text(self, "inputs", (0, 16))
         self.add_debug_text(self.player, "velocity", (0, 32))
         self.add_debug_text(self.player, "jumping", (150, 32))
@@ -124,8 +123,6 @@ class MyGame(ns.App):
 
     def update(self):
         self.level.layers["front"].update()
-        self.tr_out.update()
-        self.tr_in.update()
 
         for layer in self.scene.layers.values():
             for ent in layer:

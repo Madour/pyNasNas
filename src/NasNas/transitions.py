@@ -4,11 +4,11 @@ import math
 
 
 class Transition(GameObject, sf.Drawable):
-    def __init__(self, width, height):
+    def __init__(self):
         if self.__class__.__name__ == __class__.__name__:
             raise NotImplementedError("Transition class is not instantiable. Please use inheritance to create a Transition.")
         super().__init__()
-        self.render_texture = sf.RenderTexture(width, height)
+        self.render_texture = sf.RenderTexture(self.game._default_view.size.x, self.game._default_view.size.y)
         self.r = self.g = self.b = 0
         self.a = 255
         self.blend_mode = sf.BLEND_NONE
@@ -16,6 +16,14 @@ class Transition(GameObject, sf.Drawable):
         self.sprite = sf.Sprite(self.render_texture.texture)
         self.ended = False
         self.started = False
+
+    @property
+    def width(self):
+        return self.render_texture.size.x
+
+    @property
+    def height(self):
+        return self.render_texture.size.y
 
     def start(self):
         self.started = True
@@ -56,8 +64,8 @@ class Transition(GameObject, sf.Drawable):
 
 class FadeIn(Transition):
     """ Fade transition from black screen to transparent"""
-    def __init__(self, width, height, speed=5):
-        super().__init__(width, height)
+    def __init__(self, speed=5):
+        super().__init__()
         self.a = 255
         self.speed = speed
         self.update()
@@ -72,8 +80,8 @@ class FadeIn(Transition):
 
 class FadeOut(Transition):
     """ Fade transition from transparent to black screen"""
-    def __init__(self, width, height, speed=5):
-        super().__init__(width, height)
+    def __init__(self, speed=5):
+        super().__init__()
         self.a = 0
         self.speed = speed
         self.update()
@@ -88,12 +96,12 @@ class FadeOut(Transition):
 
 class CircleClose(Transition):
     """ Closing circle transition"""
-    def __init__(self, width, height, speed=5):
-        super().__init__(width, height)
+    def __init__(self, speed=5):
+        super().__init__()
         self.speed = speed
-        self.shape = sf.CircleShape(width+height/2)
+        self.shape = sf.CircleShape(self.width + self.height/2)
         self.shape.origin = (self.shape.radius, self.shape.radius)
-        self.shape.position = (width/2, height/2)
+        self.shape.position = (self.width/2, self.height/2)
         self.shape.fill_color = sf.Color.TRANSPARENT
         self.shapes.append(self.shape)
         self.update()
@@ -110,13 +118,13 @@ class CircleClose(Transition):
 
 
 class CircleOpen(Transition):
-    def __init__(self, width, height, speed=5):
-        super().__init__(width, height)
+    def __init__(self, speed=5):
+        super().__init__()
         self.speed = speed
-        self.limit = math.sqrt(width**2+height**2)/2
+        self.limit = math.sqrt(self.width**2 + self.height**2)/2
         self.shape = sf.CircleShape(0.1)
         self.shape.origin = (0.1, 0.1)
-        self.shape.position = (width/2, height/2)
+        self.shape.position = (self.width/2, self.height/2)
         self.shape.fill_color = sf.Color.TRANSPARENT
         self.shapes.append(self.shape)
         self.update()

@@ -13,13 +13,13 @@ from . import debug
 from . import transitions
 from .data.rect import Rect
 
-from typing import List
+from typing import List, Optional
 
 
 class App:
 
     def __init__(self, title: str = "NasNas game", w_width: int = 960, w_height: int = 540,
-                 v_width: float = 960, v_height: float = 540, fps: int = 60):
+                 v_width: float = 960, v_height: float = 540, fps: Optional[int] = 60):
         """
         Initializes the engine and creates:
             - a window
@@ -44,7 +44,9 @@ class App:
 
         self.desired_fps = fps
         self._window = sf.RenderWindow(sf.VideoMode(w_width, w_height), self.name)
-        self.window.framerate_limit = self.desired_fps
+        if self.desired_fps:
+            self.window.framerate_limit = self.desired_fps
+
         self._fullscreen = False
 
         # inputs from keyboard are stored in this list
@@ -55,6 +57,10 @@ class App:
         self._scenes : List[scenes.Scene] = []
         # list of all playing transitions
         self._transitions : List[transitions.Transition] = []
+
+        self._default_view : camera.Camera = camera.Camera("default_view", -1)
+        self._default_view.reset((0, 0), (v_width, v_height))
+        self._default_view.reset_viewport((0, 0), (1, 1))
 
         # Scene is where everything is drawn on
         self.scene = self.create_scene(w_width, w_height)
@@ -269,6 +275,12 @@ class App:
                 if cam.has_scene():
                     self.window.draw(cam.scene)
 
+        # drawing transitions on top of everything else directly on the window
+        self.window.view = self._default_view
+        for transition in self.transitions:
+            transition.update()
+            self.window.draw(transition)
+
     def run(self):
         """
         Starts the game loop.
@@ -282,8 +294,6 @@ class App:
                 self.event_handler(event)
 
             self.update()
-            # if (1/self.dt) <= self.desired_fps/2:
-            #     self.update()
 
             self.window.clear(sf.Color.BLACK)
 
