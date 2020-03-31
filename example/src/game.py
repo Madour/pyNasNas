@@ -78,10 +78,10 @@ class MyGame(ns.App):
         minimap_bg.position = (0.8*self.ui_camera.size.x, 0)
         minimap_bg.fill_color = sf.Color.BLACK
 
-        self.tr_out = ns.transitions.CircleClose(speed=5)
+        self.tr_out = ns.transitions.RotatingSquareClose(speed=5)
         self.tr_out.on_end = lambda : self.window.close()
 
-        self.tr_in = ns.transitions.CircleOpen(speed=3)
+        self.tr_in = ns.transitions.RotatingSquareOpen(speed=5)
         self.tr_in.start()
 
         self.ui_scene.add_layer(ns.Layer("ui", minimap_bg), 1)

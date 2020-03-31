@@ -94,6 +94,29 @@ class FadeOut(Transition):
             self.end()
 
 
+class CircleOpen(Transition):
+    def __init__(self, speed=5):
+        super().__init__()
+        self.speed = speed
+        self.limit = math.sqrt((self.width/2)**2 + (self.height/2)**2)
+        self.shape = sf.CircleShape(0.1)
+        self.shape.origin = (0.1, 0.1)
+        self.shape.position = (self.width/2, self.height/2)
+        self.shape.fill_color = sf.Color.TRANSPARENT
+        self.shapes.append(self.shape)
+        self.update()
+
+    @Transition.update_handler
+    def update(self):
+        if self.shape.radius > self.limit:
+            self.end()
+        elif self.shape.radius <= self.limit:
+            self.shape.radius += self.speed
+        else:
+            self.shape.radius = 0
+        self.shape.origin = (self.shape.radius, self.shape.radius)
+
+
 class CircleClose(Transition):
     """ Closing circle transition"""
     def __init__(self, speed=5):
@@ -117,24 +140,47 @@ class CircleClose(Transition):
         self.shape.origin = (self.shape.radius, self.shape.radius)
 
 
-class CircleOpen(Transition):
+class RotatingSquareOpen(Transition):
     def __init__(self, speed=5):
         super().__init__()
         self.speed = speed
-        self.limit = math.sqrt(self.width**2 + self.height**2)/2
-        self.shape = sf.CircleShape(0.1)
-        self.shape.origin = (0.1, 0.1)
+        self.limit = math.sqrt((self.width/2)**2 + (self.height/2)**2)
+        self.shape = sf.RectangleShape()
         self.shape.position = (self.width/2, self.height/2)
+        self.shape.size = (0.1, 0.1)
+        self.shape.origin = (0.05, 0.05)
         self.shape.fill_color = sf.Color.TRANSPARENT
         self.shapes.append(self.shape)
         self.update()
 
     @Transition.update_handler
     def update(self):
-        if self.shape.radius > self.limit:
+        if self.shape.size.x/2 > self.limit:
             self.end()
-        elif self.shape.radius <= self.limit:
-            self.shape.radius += self.speed
+        elif self.shape.size.x/2 <= self.limit:
+            self.shape.size += sf.Vector2(self.speed, self.speed)
+            self.shape.rotate(self.speed*2)
+        self.shape.origin = (self.shape.size.x/2, self.shape.size.y/2)
+
+class RotatingSquareClose(Transition):
+    def __init__(self, speed=5):
+        super().__init__()
+        self.speed = speed
+        self.shape = sf.RectangleShape()
+        self.shape.position = (self.width/2, self.height/2)
+        self.shape.size = (self.width, self.width)
+        self.shape.origin = (self.width/2, self.width/2)
+        self.shape.fill_color = sf.Color.TRANSPARENT
+        self.shapes.append(self.shape)
+        self.update()
+
+    @Transition.update_handler
+    def update(self):
+        if self.shape.size.x == 0:
+            self.end()
+        elif self.shape.size.x > self.speed:
+            self.shape.size -= sf.Vector2(self.speed, self.speed)
+            self.shape.rotate(self.speed*2)
         else:
-            self.shape.radius = 0
-        self.shape.origin = (self.shape.radius, self.shape.radius)
+            self.shape.size = (0, 0)
+        self.shape.origin = (self.shape.size.x/2, self.shape.size.y/2)
