@@ -1,6 +1,7 @@
 from sfml import sf
 from .data.game_obj import GameObject
 import math
+import random
 
 
 class Transition(GameObject, sf.Drawable):
@@ -163,7 +164,7 @@ class RotatingSquareOpen(Transition):
         self.shape.origin = (self.shape.size.x/2, self.shape.size.y/2)
 
 class RotatingSquareClose(Transition):
-    def __init__(self, speed=5):
+    def __init__(self, speed:int=5):
         super().__init__()
         self.speed = speed
         self.shape = sf.RectangleShape()
@@ -184,3 +185,73 @@ class RotatingSquareClose(Transition):
         else:
             self.shape.size = (0, 0)
         self.shape.origin = (self.shape.size.x/2, self.shape.size.y/2)
+
+
+class PixelsIn(Transition):
+    """ From black screen to transparent square by square """
+    def __init__(self, speed: int, pixelsize: float):
+        """ Warning : a small pixelsize and big speed will lead to severe frame drops.
+            Avoid using a pixelsize smaller than 8.
+        """
+        super().__init__()
+        self.speed = speed
+        self.shapes = []
+        self.remaining = []
+        col_nb = math.ceil(self.render_texture.size.x/pixelsize)
+        row_nb = math.ceil(self.render_texture.size.y/pixelsize)
+        for x in range(col_nb):
+            for y in range(row_nb):
+                s = sf.RectangleShape()
+                s.position = (x*pixelsize, y*pixelsize)
+                s.size = (pixelsize, pixelsize)
+                s.fill_color = sf.Color.BLACK
+                self.shapes.append(s)
+                self.remaining.append(s)
+        self.update()
+
+    @Transition.update_handler
+    def update(self):
+        if self.remaining:
+            for i in range(self.speed):
+                s = random.choice(self.remaining)
+                s.fill_color = sf.Color.TRANSPARENT
+                self.remaining.remove(s)
+                if not self.remaining:
+                    break
+        else:
+            self.end()
+
+
+class PixelsOut(Transition):
+    """ From transparent screen to black screen square by square """
+    def __init__(self, speed: int, pixelsize: float):
+        """ Warning : a small pixelsize and big speed will lead to severe frame drops.
+            Avoid using a pixelsize smaller than 8.
+        """
+        super().__init__()
+        self.speed = speed
+        self.shapes = []
+        self.remaining = []
+        col_nb = math.ceil(self.render_texture.size.x/pixelsize)
+        row_nb = math.ceil(self.render_texture.size.y/pixelsize)
+        for x in range(col_nb):
+            for y in range(row_nb):
+                s = sf.RectangleShape()
+                s.position = (x*pixelsize, y*pixelsize)
+                s.size = (pixelsize, pixelsize)
+                s.fill_color = sf.Color.TRANSPARENT
+                self.shapes.append(s)
+                self.remaining.append(s)
+        self.update()
+
+    @Transition.update_handler
+    def update(self):
+        if self.remaining:
+            for i in range(self.speed):
+                s = random.choice(self.remaining)
+                s.fill_color = sf.Color.BLACK
+                self.remaining.remove(s)
+                if not self.remaining:
+                    break
+        else:
+            self.end()
