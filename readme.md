@@ -9,9 +9,8 @@
  - [x] Text and bitmap fonts
  - [x] Tiled map loader (.tmx)
  - [x] Debug text display in-game
- 
-#### In progress :
  - [x] Transitions
+ 
  
 #### To do :
  - [ ] Menus and UI
