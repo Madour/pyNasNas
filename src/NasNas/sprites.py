@@ -1,3 +1,14 @@
+from sfml import sf
+from typing import Union, Tuple, List
+from .data.rect import Rect
+from .utils import to_Vector2
+
+class AnimFrame:
+    def __init__(self, rectangle: Rect, duration: int, origin: Union[Tuple[int, int], sf.Vector2]=(0, 0)):
+        self.rectangle: Rect = rectangle    # texture rectangle of the frame
+        self.duration: int = duration       # duration of the frame in milliseconds
+        self.origin: Union[Tuple[int, int], sf.Vector2] = to_Vector2(origin)    # origin of the frame
+
 class Anim:
     """Anim is used to describe an animation
 
@@ -9,11 +20,9 @@ class Anim:
 
     You can also specify if the animation should loop or not (True by default)
     """
-    def __init__(self, texture_rectangles: list, frames_duration: list, origins: list = None, loop: bool = True):
-        self.frames = texture_rectangles
-        self.frames_count = len(frames_duration)
-        self.frames_duration = frames_duration
-        self.frames_origin = origins
+    def __init__(self, frames: List[AnimFrame], loop: bool = True):
+        self.frames = frames
+        self.frames_count = len(self.frames)
         self.loop = loop
 
 

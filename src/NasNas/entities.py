@@ -13,9 +13,8 @@ class BaseEntity(GameObject, sf.Drawable):
         self.anims = self.data.anims
 
         self.sprite = sf.Sprite(self.data.texture)
-        self.sprite.texture_rectangle = self.anims[self.anim_state].frames[0]
-        if self.anims[self.anim_state].frames_origin:
-            self.sprite.origin = self.anims[self.anim_state].frames_origin[0]
+        self.sprite.texture_rectangle = self.anims[self.anim_state].frames[0].rectangle
+        self.sprite.origin = self.anims[self.anim_state].frames[0].origin
         self.direction = sf.Vector2(1, 1)
 
         self.gx = self.sprite.position.x
@@ -46,11 +45,8 @@ class BaseEntity(GameObject, sf.Drawable):
                 self._anim_state = value
                 self.anim_index = 0
                 self.anim_clock.restart()
-                self.sprite.texture_rectangle = self.anims[value].frames[0]
-                if self.anims[value].frames_origin:
-                    self.sprite.origin = self.anims[value].frames_origin[0]
-                else:
-                    self.sprite.origin = (0, 0)
+                self.sprite.texture_rectangle = self.anims[value].frames[0].rectangle
+                self.sprite.origin = self.anims[value].frames[0].origin
             else:
                 raise KeyError(f"Entity {self.name} has no animation anim_state called {value}")
 
@@ -103,7 +99,7 @@ class BaseEntity(GameObject, sf.Drawable):
 
     def update_anim(self):
         ended = False
-        if self.anim_clock.elapsed_time.milliseconds >= self.anims[self.anim_state].frames_duration[self.anim_index]:
+        if self.anim_clock.elapsed_time.milliseconds >= self.anims[self.anim_state].frames[self.anim_index].duration:
             self.anim_index += 1
             if self.anim_index >= self.anims[self.anim_state].frames_count:
                 if self.anims[self.anim_state].loop:
@@ -113,11 +109,8 @@ class BaseEntity(GameObject, sf.Drawable):
                     self.anim_index -= 1
 
             if not ended:
-                self.sprite.texture_rectangle = self.anims[self.anim_state].frames[self.anim_index]
-                # adjusting sprite origin based on the new texture_rectangle
-                if self.anims[self.anim_state].frames_origin:
-                    if self.anims[self.anim_state].frames_origin[self.anim_index]:
-                        self.sprite.origin = self.anims[self.anim_state].frames_origin[self.anim_index]
+                self.sprite.texture_rectangle = self.anims[self.anim_state].frames[self.anim_index].rectangle
+                self.sprite.origin = self.anims[self.anim_state].frames[self.anim_index].origin
 
             self.anim_clock.restart()
 
@@ -130,10 +123,7 @@ class BaseEntity(GameObject, sf.Drawable):
 class PlatformerEntity(BaseEntity):
     def __init__(self, data):
         super().__init__(data)
-        self.sprite.origin = (self.sprite.texture_rectangle.width / 2, self.sprite.texture_rectangle.height)
-        if self.anims[self.anim_state].frames_origin:
-            if self.anims[self.anim_state].frames_origin[0]:
-                self.sprite.origin = self.anims[self.anim_state].frames_origin[0]
+        self.sprite.origin = self.anims[self.anim_state].frames[0].origin
 
         self.controls = {
             'right': keys.Keyboard.RIGHT,

@@ -1,6 +1,6 @@
 from .app import App, Res, RES_DIR
 from . import entities
-from .sprites import Anim, Sprite
+from .sprites import AnimFrame, Anim, Sprite
 from .layers import Layer, Mask
 from .camera import Camera
 from . import transitions

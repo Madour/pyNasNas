@@ -1,11 +1,10 @@
 from sfml import sf
 import src.NasNas as ns
-
+import src.NasNas.reslib.tile_mapping as tm
 # always call this static method before you do anything if you want to use the resource manage Res
 ns.App.load_resources(True)
 
 from example.src import entities
-
 
 class MyGame(ns.App):
     def __init__(self):
@@ -13,7 +12,8 @@ class MyGame(ns.App):
         self.window.key_repeat_enabled = False
         self.window.vertical_synchronization = True
 
-        self.level = ns.Res.Maps.level
+        self.level : tm.TileMap = ns.Res.Maps.level
+
         self.level.set_collisions_layer("collisions")
 
         self.scene = self.create_scene(self.level.width * 16, self.level.height * 16)
@@ -78,10 +78,10 @@ class MyGame(ns.App):
         minimap_bg.position = (0.8*self.ui_camera.size.x, 0)
         minimap_bg.fill_color = sf.Color.BLACK
 
-        self.tr_out = ns.transitions.PixelsOut(speed=5, pixelsize=8)
+        self.tr_out = ns.transitions.RotatingSquareClose(speed=5)
         self.tr_out.on_end = lambda : self.window.close()
 
-        self.tr_in = ns.transitions.PixelsIn(speed=10, pixelsize=4)
+        self.tr_in = ns.transitions.CircleOpen(speed=8)
         self.tr_in.start()
 
         self.ui_scene.add_layer(ns.Layer("ui", minimap_bg), 1)
