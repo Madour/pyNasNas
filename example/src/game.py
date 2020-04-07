@@ -1,29 +1,28 @@
 from sfml import sf
 import src.NasNas as ns
-import src.NasNas.reslib.tile_mapping as tm
-# always call this static method before you do anything if you want to use the resource manage Res
-ns.App.load_resources(True)
 
 from example.src import entities
+
 
 class MyGame(ns.App):
     def __init__(self):
         super().__init__("pySFML Game Engine - Example Game", 960, 576, 320, 192, 60)
+
         self.window.key_repeat_enabled = False
         self.window.vertical_synchronization = True
 
-        self.level : tm.TileMap = ns.Res.Maps.level
+        self.level = ns.Res.Maps.level
 
-        self.level.set_collisions_layer("collisions")
+        self.level.set_collisions_objectgroup("collisions")
 
         self.scene = self.create_scene(self.level.width * 16, self.level.height * 16)
 
         self.player = entities.Player()
-        self.player.controls = {'right':ns.Keyboard.RIGHT, 'left':ns.Keyboard.LEFT, 'up': ns.Keyboard.UP, 'down': ns.Keyboard.DOWN}
+        self.player.controls = {'right': ns.Keyboard.RIGHT, 'left': ns.Keyboard.LEFT, 'up': ns.Keyboard.UP, 'down': ns.Keyboard.DOWN}
         self.player.position = (2*16, 7*16)
 
         self.player2 = entities.Player()
-        self.player2.controls = {'right':ns.Keyboard.D, 'left':ns.Keyboard.Q, 'up': ns.Keyboard.Z, 'down': ns.Keyboard.S}
+        self.player2.controls = {'right': ns.Keyboard.D, 'left': ns.Keyboard.Q, 'up': ns.Keyboard.Z, 'down': ns.Keyboard.S}
         self.player2.position = (25 * 16, 7 * 16)
 
         bitmap_font = ns.BitmapFont(ns.Res.Textures.font, (8, 8), spacings_map={"O": 8})
@@ -37,21 +36,17 @@ class MyGame(ns.App):
         self.text_bitmap4.position = self.player.position + sf.Vector2(0, -60)
 
         self.game_camera.reset((0, 0), (self.V_WIDTH/2, self.V_HEIGHT))
-        self.game_camera.viewport = ns.Rect((0, 0), (0.5 ,1))
-        self.game_camera.vp_base_size = sf.Vector2(0.5, 1)
+        self.game_camera.reset_viewport((0, 0), (0.5, 1))
         self.game_camera.follow(self.player2)
         self.game_camera.scene = self.scene
 
-        self.game_camera2 = self.create_camera("player2", 0, ns.Rect((0,0), (self.V_WIDTH/2, self.V_HEIGHT)), ns.Rect((0.5, 0), (0.5, 1)))
+        self.game_camera2 = self.create_camera("player2", 0, ns.Rect((0, 0), (self.V_WIDTH/2, self.V_HEIGHT)), ns.Rect((0.5, 0), (0.5, 1)))
         self.game_camera2.follow(self.player)
         self.game_camera2.scene = self.scene
 
-        self.minimap_camera.follow(self.player)
-        self.minimap_camera.scene = self.scene
-
         map_back_layer = ns.Layer("map_back", self.level.layers["back"])
         map_front_layer = ns.Layer("map_front", self.level.layers["front"])
-        self.map_collisions_layer = ns.Layer("map_collisions", self.level.layers["collisions"])
+        self.map_collisions_layer = ns.Layer("map_collisions", self.level.objectgroups["collisions"])
         texts_layers = ns.Layer("texts", self.text_bitmap, self.text_bitmap2, self.text_bitmap3, self.text_bitmap4)
         entities_layer = ns.Layer("entities", self.player, self.player2)
 
@@ -72,20 +67,11 @@ class MyGame(ns.App):
         self.scene.add_layer(map_front_layer, 1)
         self.scene.add_layer(map_back_layer, 0)
 
-        self.ui_scene = self.create_scene(self.ui_camera.size.x, self.ui_camera.size.y)
-        minimap_bg = sf.RectangleShape()
-        minimap_bg.size = (0.2*self.ui_camera.size.x, 0.2*self.ui_camera.size.y)
-        minimap_bg.position = (0.8*self.ui_camera.size.x, 0)
-        minimap_bg.fill_color = sf.Color.BLACK
-
         self.tr_out = ns.transitions.RotatingSquareClose(speed=5)
-        self.tr_out.on_end = lambda : self.window.close()
+        self.tr_out.on_end = lambda: self.window.close()
 
         self.tr_in = ns.transitions.CircleOpen(speed=8)
         self.tr_in.start()
-
-        self.ui_scene.add_layer(ns.Layer("ui", minimap_bg), 1)
-        self.ui_camera.scene = self.ui_scene
 
         self.debug = False
         self.add_debug_text(self.player, "onground", (0, 0))
@@ -109,10 +95,9 @@ class MyGame(ns.App):
                 if self.debug:
                     self.scene.remove_layer(layer=self.scene.get_layer("map_collisions"))
                 else:
-                    self.scene.add_layer(self.map_collisions_layer, 3)
+                    self.scene.add_layer(self.map_collisions_layer, 9)
                 self.debug = not self.debug
             elif event["code"] == ns.Keyboard.M:
-                self.minimap_camera.visible = not self.minimap_camera.visible
                 self.game_camera.quake(duration=5, amplitude=2)
                 self.game_camera2.quake(5, 2)
             elif event["code"] == ns.Keyboard.L:
@@ -122,7 +107,7 @@ class MyGame(ns.App):
                     self.scene.add_mask(self.mask, 5)
 
     def update(self):
-        self.level.layers["front"].update()
+        self.level.update()
 
         for layer in self.scene.layers.values():
             for ent in layer:
@@ -147,5 +132,3 @@ class MyGame(ns.App):
             self.light_growing = True
         self.player_light.position = self.player.position - sf.Vector2(0, 5)
         self.player_light2.position = self.player.position - sf.Vector2(0, 5)
-
-

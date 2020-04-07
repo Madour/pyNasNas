@@ -1,8 +1,9 @@
 from sfml import sf
 import os
 from .resource_path import find_resource
-from . import tile_mapping as tm
 from typing import Dict, Union
+from .tileset_manager import TilesetManager
+from ..tilemapping import tiledmap as tm
 
 
 def load_resources(obj, path):
@@ -29,12 +30,15 @@ def load_resources(obj, path):
                 setattr(res._fonts, filename, value)
 
             elif ext in [".tmx"]:
-                value = tm.TileMap(find_resource(os.path.join(path, file)))
+                value = tm.TiledMap(find_resource(os.path.join(path, file)))
                 setattr(obj, filename, value)
                 res = obj
                 while res._parent:
                     res = res._parent
                 setattr(res._maps, filename, value)
+
+            elif ext in [".tsx"]:
+                TilesetManager.load_tsx(find_resource(os.path.join(path, file)))
 
         elif os.path.isdir(os.path.join(path, file)):
             dir = Dir(filename, parent=obj)
@@ -46,11 +50,13 @@ class Dir:
     def __init__(self, name, parent = None):
         self._name = name
         self._parent = parent
-        self._data : Dict[str, Union[Dir, sf.Texture, tm.TileMap, sf.Font]] = {}
+        self._data : Dict[str, Union[Dir, sf.Texture, tm.TiledMap, sf.Font]] = {}
 
-    def __getattr__(self, item):
+    def __getattr__(self, item) -> Union[sf.Font, sf.Texture, tm.TiledMap]:
         if item[0] == '_':
             return self.__dict__[item]
+        if item == '..':
+            return self._parent
         if item in self._data:
             return self._data[item]
         raise AttributeError(f"File or directory '{item}' not found in directory '{self._name}'")

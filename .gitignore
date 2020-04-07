@@ -2,6 +2,10 @@
 .git
 doc
 wiki
+build
+dist
+*.egg
+*.egg-info
 ignored
 __pycache__/
 *.py[cod]

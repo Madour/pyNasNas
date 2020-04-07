@@ -1,11 +1,7 @@
 from sfml import sf
-from os.path import join
 
 from .data.game_obj import GameObject
 from .data import const
-
-from .reslib.resource_path import find_resource, RES_DIR
-from .reslib import Res
 
 from . import camera
 from . import scenes
@@ -17,7 +13,6 @@ from typing import List, Optional
 
 
 class App:
-
     def __init__(self, title: str = "NasNas game", w_width: int = 960, w_height: int = 540,
                  v_width: float = 960, v_height: float = 540, fps: Optional[int] = 60):
         """
@@ -31,8 +26,7 @@ class App:
             w_height (int): window height
             v_width (int): game view width
             v_height (int): game view height
-            desired_fps (int): desired fps
-
+            fps (int): desired fps
         """
         GameObject.game = self
 
@@ -43,37 +37,31 @@ class App:
         self.name = title
 
         self.desired_fps = fps
-        self._window = sf.RenderWindow(sf.VideoMode(w_width, w_height), self.name)
+        self._window = sf.RenderWindow(sf.VideoMode(w_width, w_height), self.name, sf.Style.DEFAULT)
+
         if self.desired_fps:
             self.window.framerate_limit = self.desired_fps
 
         self._fullscreen = False
 
         # inputs from keyboard are stored in this list
-        self._inputs : List[int] = []
+        self._inputs: List[int] = []
         # list of all cameras/view used in the game
-        self._cameras : List[camera.Camera] = []
+        self._cameras: List[camera.Camera] = []
         # list of all scenes used in the game, usually 1 is enough
-        self._scenes : List[scenes.Scene] = []
+        self._scenes: List[scenes.Scene] = []
         # list of all playing transitions
-        self._transitions : List[transitions.Transition] = []
+        self._transitions: List[transitions.Transition] = []
 
-        self._default_view : camera.Camera = camera.Camera("default_view", -1)
+        self._default_view: camera.Camera = camera.Camera("default_view", -1)
         self._default_view.reset((0, 0), (v_width, v_height))
         self._default_view.reset_viewport((0, 0), (1, 1))
 
         # Scene is where everything is drawn on
         self.scene = self.create_scene(w_width, w_height)
 
-        # camera made to look at the GUI and HUD scene
-        self.ui_camera = self.create_camera("default", 1, Rect((0, 0), (v_width, v_height)))
-
         # game camera, usually looks at the main scene (world map, scrolling level ...)
         self.game_camera = self.create_camera("game", 0, Rect((0, 0), (v_width, v_height)))
-
-        # minimap, looks at the main scene but sees a larger area than the game camera
-        self.minimap_camera = self.create_camera("minimap", 2, Rect((0, 0), (v_width*3, v_height*3)), Rect((0.8, 0), (0.2, 0.2)))
-        self.minimap_camera.frames_delay = 0
 
         # clock and dt used for FPS calculation
         self.clock = sf.Clock()
@@ -85,41 +73,28 @@ class App:
         self.scale_view()
 
     @property
-    def window(self):
+    def window(self) -> sf.RenderWindow:
         return self._window
+
     @property
-    def fullscreen(self):
+    def fullscreen(self) -> bool:
         return self._fullscreen
+
     @property
-    def inputs(self):
+    def inputs(self) -> List[int]:
         return self._inputs
+
     @property
-    def cameras(self):
+    def cameras(self) -> List[camera.Camera]:
         return self._cameras
+
     @property
-    def scenes(self):
+    def scenes(self) -> List[scenes.Scene]:
         return self._scenes
+
     @property
-    def transitions(self):
+    def transitions(self) -> List[transitions.Transition]:
         return self._transitions
-
-    @staticmethod
-    def load_resources(loading_image: bool = False):
-        """
-        Initialize the resources manager Res and load all resources in RES_DIR
-
-        Args:
-            loading_image (bool): Set to True to show a small Loading window when Res is loading assets.
-        """
-        if loading_image:
-            window = sf.RenderWindow(sf.VideoMode(160, 90), "Game Base", sf.Style.NONE)
-            l = sf.Sprite(sf.Texture.from_file(find_resource(join(RES_DIR, "loading.png"))))
-            window.draw(l)
-            window.display()
-            Res.load()
-            window.close()
-        else:
-            Res.load()
 
     def create_scene(self, width: int, height: int):
         """
@@ -162,7 +137,7 @@ class App:
         self.cameras.append(cam)
         return cam
 
-    def add_debug_text(self, instance:object, attr_name: str, position: tuple, float_round: int = None):
+    def add_debug_text(self, instance: object, attr_name: str, position: tuple, float_round: int = None):
         """
         Adds a DebugText to self.debug_texts. The text will be drawn at the given position
 
@@ -238,7 +213,7 @@ class App:
             if event['code'] not in self.inputs:
                 self.inputs.insert(0, event['code'])
         elif event == sf.Event.KEY_RELEASED:
-            if event['code'] in self.inputs :
+            if event['code'] in self.inputs:
                 self.inputs.remove(event['code'])
         elif event == sf.Event.RESIZED:
             self.scale_view()
@@ -268,7 +243,7 @@ class App:
             scene._render()
         for cam in self.cameras:
             cam.update(self.dt)
-        self.cameras.sort(key=lambda x:x.render_order)
+        self.cameras.sort(key=lambda x: x.render_order)
         for cam in self.cameras:
             if cam.visible:
                 self.window.view = cam
@@ -285,6 +260,10 @@ class App:
         """
         Starts the game loop.
         """
+        if self.desired_fps:
+            self._window.framerate_limit = self.desired_fps
+        self._window.key_repeat_enabled = False
+
         while self.window.is_open:
             self.dt = self.clock.restart().seconds
             self.window.title = self.name+" - FPS:" + str(round(1 / self.dt))
