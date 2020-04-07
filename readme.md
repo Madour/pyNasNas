@@ -1,18 +1,18 @@
 # NasNas
 ### A simple game framework to get started quickly with python and sfml.
 
-#### Features :
+### Features :
  - [x] Automatic resource loader and  manager system
  - [x] Scene and Layers system
  - [x] Entities, sprites and animations 
- - [x] Camera and minimap
+ - [x] Cameras
  - [x] Text and bitmap fonts
  - [x] Tiled map loader (.tmx)
  - [x] Debug text display in-game
  - [x] Transitions
  
  
-#### To do :
+### To do :
  - [ ] Menus and UI
  - [ ] Splash screens
  - [ ] Levels and game events management
@@ -20,7 +20,7 @@
  - [ ] Particles system
 
 
-#### Install
+### Install
 
 Let's say your project has the following structure
 ```
@@ -43,7 +43,7 @@ Then you can, import the framework with:
 import src.NasNas as ns
 ```
 
-#### How to use
+### How to use
 
 Visit the [wiki](https://github.com/Madour/pySFMLGameEngine/wiki) to learn how to use it.
 
