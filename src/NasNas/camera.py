@@ -1,6 +1,8 @@
 from sfml import sf
 import random as rand
 from .data.game_obj import GameObject
+from .data.rect import Rect
+
 from typing import Union, Optional
 
 
@@ -69,11 +71,11 @@ class Camera(GameObject, sf.View):
         return sf.Vector2(self.left, self.top)
 
     @property
-    def size(self):
+    def size(self) -> sf.Vector2:
         return sf.Vector2(self.base_size.x, self.base_size.y)
 
     @property
-    def left(self):
+    def left(self) -> float:
         return self.center.x - self.size.x / 2
 
     @left.setter
@@ -81,7 +83,7 @@ class Camera(GameObject, sf.View):
         self.center = (value + self.size.x / 2, self.center.y)
 
     @property
-    def top(self):
+    def top(self) -> float:
         return self.center.y - self.size.y / 2
 
     @top.setter
@@ -89,7 +91,7 @@ class Camera(GameObject, sf.View):
         self.center = (self.center.x, value + self.size.y/2)
 
     @property
-    def right(self):
+    def right(self) -> float:
         return self.center.x + self.size.x / 2
 
     @right.setter
@@ -97,12 +99,16 @@ class Camera(GameObject, sf.View):
         self.center = (value - self.size.x/2, self.center.y)
 
     @property
-    def bottom(self):
+    def bottom(self) -> float:
         return self.center.y + self.size.y / 2
 
     @bottom.setter
     def bottom(self, value: int):
         self.center = (self.center.x, value - self.size.y / 2)
+
+    @property
+    def bounds(self) -> Rect:
+        return Rect((self.left, self.top), (self.size.x, self.size.y))
 
     def follow(self, entity):
         self.reference = entity
