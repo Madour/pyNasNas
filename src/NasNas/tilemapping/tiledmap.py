@@ -79,7 +79,7 @@ class TiledMap(GameObject):
             raise AttributeError(f"{name} is not an objectgroup of {self.name} TiledMap")
 
     @property
-    def collisions(self):
+    def collisions(self) -> List[Rect]:
         return self._collisions
 
     @property
