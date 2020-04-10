@@ -38,13 +38,13 @@ class Scene(GameObject, sf.Drawable):
 
     def get_layer(self, name: str = None, order: int = None) -> layers.Layer:
         for layer_order, layer in self.layers.items():
-            if name != None and order != None:
+            if name is not None and order is not None:
                 if self.layers[order].name != name:
                     raise IndexError(f"Requested order {order} and name {name} does not match")
-            if name != None:
+            if name is not None:
                 if layer.name == name:
                     return layer
-            if order != None:
+            if order is not None:
                 if layer_order == order:
                     return layer
 
