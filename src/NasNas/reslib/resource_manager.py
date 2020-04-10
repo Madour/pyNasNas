@@ -33,15 +33,18 @@ class ResMeta(type):
     def is_ready(cls) -> bool:
         return cls._ready
 
-    def __iter__(cls):
-        for x in cls._assets:
+    @classmethod
+    def __iter__(mcs):
+        for x in mcs._assets:
             yield x
 
-    def values(cls):
-        return cls._assets.values()
+    @classmethod
+    def values(mcs):
+        return mcs._assets.values()
 
-    def items(cls):
-        return cls._assets.items()
+    @classmethod
+    def items(mcs):
+        return mcs._assets.items()
 
     def __getattr__(cls, item) -> Dir:
         if item[0] == "_":
