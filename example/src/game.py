@@ -69,11 +69,11 @@ class MyGame(ns.App):
         self.scene.add_layer(map_front_layer, 1)
         self.scene.add_layer(map_back_layer, 0)
 
-        self.tr_out = ns.transitions.RotatingSquareClose(speed=5)
-        self.tr_out.on_end = lambda: self.window.close()
-
         self.tr_in = ns.transitions.CircleOpen(speed=8)
         self.tr_in.start()
+
+        self.tr_out = ns.transitions.RotatingSquareClose(speed=5)
+        self.tr_out.on_end = lambda: self.window.close()
 
         self.debug = False
         self.add_debug_text(self.player, "onground", (0, 0))
@@ -82,6 +82,10 @@ class MyGame(ns.App):
         self.add_debug_text(self.player, "velocity", (0, 32))
         self.add_debug_text(self.player, "jumping", (150, 32))
         self.add_debug_text(self.player, "falling", (300, 32))
+
+        @self.window.on_close
+        def closing_window():
+            print("Window will close now !")
 
     def event_handler(self, event):
         if event == sf.Event.KEY_PRESSED:

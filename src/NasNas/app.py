@@ -7,6 +7,7 @@ from . import camera
 from . import scenes
 from . import debug
 from . import transitions
+from . import window
 from .data.rect import Rect
 
 from typing import List, Optional
@@ -37,7 +38,7 @@ class App:
         self.name = title
 
         self.desired_fps = fps
-        self._window = sf.RenderWindow(sf.VideoMode(w_width, w_height), self.name, sf.Style.DEFAULT)
+        self._window = window.RenderWindow(sf.VideoMode(w_width, w_height), self.name)
 
         if self.desired_fps:
             self.window.framerate_limit = self.desired_fps
@@ -73,7 +74,7 @@ class App:
         self.scale_view()
 
     @property
-    def window(self) -> sf.RenderWindow:
+    def window(self) -> window.RenderWindow:
         return self._window
 
     @property
@@ -215,8 +216,6 @@ class App:
         elif event == sf.Event.KEY_RELEASED:
             if event['code'] in self.inputs:
                 self.inputs.remove(event['code'])
-        elif event == sf.Event.RESIZED:
-            self.scale_view()
 
     def event_handler(self, event: sf.Event):
         """
@@ -260,10 +259,6 @@ class App:
         """
         Starts the game loop.
         """
-        if self.desired_fps:
-            self._window.framerate_limit = self.desired_fps
-        self._window.key_repeat_enabled = False
-
         while self.window.is_open:
             self.dt = self.clock.restart().seconds
             self.window.title = self.name+" - FPS:" + str(round(1 / self.dt))
