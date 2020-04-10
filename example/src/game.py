@@ -73,7 +73,14 @@ class MyGame(ns.App):
         self.tr_in.start()
 
         self.tr_out = ns.transitions.RotatingSquareClose(speed=5)
-        self.tr_out.on_end = lambda: self.window.close()
+
+        @self.tr_out.on_start
+        def tr_out_starting():
+            self.window.capture().to_file("screen.png")
+
+        @self.tr_out.on_end
+        def tr_out_ending():
+            self.window.close()
 
         self.debug = False
         self.add_debug_text(self.player, "onground", (0, 0))

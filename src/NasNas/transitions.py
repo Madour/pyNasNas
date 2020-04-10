@@ -2,6 +2,7 @@ from sfml import sf
 from .data.game_obj import GameObject
 import math
 import random
+from functools import wraps
 
 
 class Transition(GameObject, sf.Drawable):
@@ -17,6 +18,7 @@ class Transition(GameObject, sf.Drawable):
         self.sprite = sf.Sprite(self.render_texture.texture)
         self.ended = False
         self.started = False
+        self._callbacks = {"on_start": lambda: None, "on_end": lambda: None}
 
     @property
     def width(self):
@@ -29,18 +31,26 @@ class Transition(GameObject, sf.Drawable):
     def start(self):
         self.started = True
         self.game.transitions.append(self)
-        self.on_start()
+        self._callbacks["on_start"]()
 
-    def on_start(self):
-        pass
+    def on_start(self, fn):
+        @wraps(fn)
+        def wrapper():
+            return fn()
+        self._callbacks["on_start"] = wrapper
+        return wrapper
 
     def end(self):
         self.ended = True
-        self.on_end()
+        self._callbacks["on_end"]()
         self.game.transitions.remove(self)
 
-    def on_end(self):
-        pass
+    def on_end(self, fn):
+        wraps(fn)
+        def wrapper():
+            return fn()
+        self._callbacks["on_end"] = wrapper
+        return wrapper
 
     @staticmethod
     def update_handler(update_func):
