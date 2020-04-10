@@ -1,14 +1,14 @@
 from sfml import sf
 from xml.etree import ElementTree
 
-from ..data.game_obj import GameObject
 from ..data.rect import Rect
+from ..data.shapes import EllipseShape, LineShape
 from .tiles import Tile
 
 from typing import List, Dict, Union, Optional
 
 
-class TileLayer(GameObject, sf.Drawable):
+class TileLayer(sf.Drawable):
     def __init__(self, tiledmap, xml: ElementTree.Element):
         super().__init__()
         self.xml = xml
@@ -100,30 +100,80 @@ class ObjectGroup(sf.Drawable):
 
         color = self.xml.get('color')
         if color:
-            self.color = sf.Color(int(color[1:3], 16), int(color[3:5], 16), int(color[5:7], 16), 155)
+            if len(color) == 9:
+                self.color = sf.Color(int(color[3:5], 16), int(color[5:7], 16), int(color[7:9], 16), int(color[1:3], 16))
+            else:
+                self.color = sf.Color(int(color[1:3], 16), int(color[3:5], 16), int(color[5:7], 16), 255)
         else:
-            self.color = sf.Color(100, 100, 100, 155)
+            self.color = sf.Color(100, 100, 100, 160)
 
-        self.objects = []
-        self.sprite = sf.VertexArray(sf.PrimitiveType.QUADS)
+        self.rectangles = []
+        self.points = []
+        self.ellipses = []
+        self.polygons = []
+        self.lines = []
+
+        self._render_texture = sf.RenderTexture(tiledmap.width*tiledmap.tile_width, tiledmap.height*tiledmap.tile_height)
+        self.sprite = sf.Sprite(self._render_texture.texture)
 
     def parse(self):
+        self._render_texture.clear(sf.Color.TRANSPARENT)
+        pts_vertexarray = sf.VertexArray(sf.PrimitiveType.POINTS)
+        rect_vertexarray = sf.VertexArray(sf.PrimitiveType.QUADS)
         for object_elmnt in self.xml.findall('object'):
-            x = int(object_elmnt.get('x'))
-            y = int(object_elmnt.get('y'))
-            width = int(object_elmnt.get('width')) if object_elmnt.get('width') else 0
-            height = int(object_elmnt.get('height')) if object_elmnt.get('height') else 0
-            self.objects.append(Rect((x, y), (width, height)))
+            x = float(object_elmnt.get('x'))
+            y = float(object_elmnt.get('y'))
+            width = float(object_elmnt.get('width')) if object_elmnt.get('width') else 0
+            height = float(object_elmnt.get('height')) if object_elmnt.get('height') else 0
+            if not list(object_elmnt):
+                self.rectangles.append(Rect((x, y), (width, height)))
+            else:
+                child = list(object_elmnt)[0]
+                if child.tag == "ellipse":
+                    ellipse = EllipseShape((width/2, height/2))
+                    ellipse.position = (x, y)
+                    ellipse.fill_color = self.color
+                    self._render_texture.draw(ellipse)
+                elif child.tag == "point":
+                    self.points.append(sf.Vector2(x, y))
+                elif child.tag == "polyline":
+                    points = []
+                    for strpt in child.get('points').split():
+                        points.append(sf.Vector2(float(strpt.split(',')[0]), float(strpt.split(',')[1])))
+                    line = LineShape(*points)
+                    line.position = (x, y)
+                    line.color = self.color
+                    self._render_texture.draw(line)
+                elif child.tag == "polygon":
+                    points = []
+                    for strpt in child.get('points').split():
+                        points.append(sf.Vector2(float(strpt.split(',')[0]), float(strpt.split(',')[1])))
+                    polygone = sf.ConvexShape(len(points))
+                    for i, p in enumerate(points):
+                        polygone.set_point(i, p)
+                    polygone.position = (x, y)
+                    polygone.fill_color = self.color
+                    self.polygons.append(polygone)
+                    self._render_texture.draw(polygone)
 
-        self.sprite.resize(4*len(self.objects))
-
-        for index in range(0, len(self.objects)*4, 4):
-            self.sprite[index + 0].position = self.objects[index//4].topleft
-            self.sprite[index + 1].position = self.objects[index//4].topright
-            self.sprite[index + 2].position = self.objects[index//4].bottomright
-            self.sprite[index + 3].position = self.objects[index//4].bottomleft
+        rect_vertexarray.resize(4*len(self.rectangles))
+        for index in range(0, len(self.rectangles)*4, 4):
+            rect_vertexarray[index + 0].position = self.rectangles[index//4].topleft
+            rect_vertexarray[index + 1].position = self.rectangles[index//4].topright
+            rect_vertexarray[index + 2].position = self.rectangles[index//4].bottomright
+            rect_vertexarray[index + 3].position = self.rectangles[index//4].bottomleft
             for i in range(4):
-                self.sprite[index + i].color = self.color
+                rect_vertexarray[index + i].color = self.color
+
+        pts_vertexarray.resize(len(self.points))
+        for index in range(len(self.points)):
+            pts_vertexarray[index].position = self.points[index]
+            pts_vertexarray[index].color = self.color
+
+        self._render_texture.draw(rect_vertexarray)
+        self._render_texture.draw(pts_vertexarray)
+        self._render_texture.display()
+        self.sprite.texture = self._render_texture.texture
 
     @property
     def position(self):

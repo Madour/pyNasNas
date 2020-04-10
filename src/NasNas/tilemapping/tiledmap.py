@@ -74,7 +74,7 @@ class TiledMap(GameObject):
 
     def set_collisions_objectgroup(self, name):
         if name in self.objectgroups:
-            self._collisions = self.objectgroups[name].objects
+            self._collisions = self.objectgroups[name].rectangles
         else:
             raise AttributeError(f"{name} is not an objectgroup of {self.name} TiledMap")
 

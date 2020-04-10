@@ -46,7 +46,8 @@ class MyGame(ns.App):
 
         map_back_layer = ns.Layer("map_back", self.level.layers["back"])
         map_front_layer = ns.Layer("map_front", self.level.layers["front"])
-        self.map_collisions_layer = ns.Layer("map_collisions", self.level.objectgroups["collisions"])
+        map_coins_layer = ns.Layer("map_coins", self.level.layers["coins"])
+        self.map_collisions_layer = ns.Layer("map_collisions", self.level.objectgroups["collisions"], self.level.objectgroups["coins"])
         texts_layers = ns.Layer("texts", self.text_bitmap, self.text_bitmap2, self.text_bitmap3, self.text_bitmap4)
         entities_layer = ns.Layer("entities", self.player, self.player2)
 
@@ -63,6 +64,7 @@ class MyGame(ns.App):
         self.mask.add(self.player_light)
 
         self.scene.add_layer(entities_layer, 4)
+        #self.scene.add_layer(map_coins_layer, 3)
         self.scene.add_layer(texts_layers, 2)
         self.scene.add_layer(map_front_layer, 1)
         self.scene.add_layer(map_back_layer, 0)
@@ -104,7 +106,7 @@ class MyGame(ns.App):
                 if self.scene.masks:
                     self.scene.remove_mask(self.mask)
                 else:
-                    self.scene.add_mask(self.mask, 5)
+                    self.scene.add_mask(self.mask, 10)
 
     def update(self):
         self.level.update()
