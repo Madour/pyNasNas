@@ -2,13 +2,14 @@ from sfml import sf
 
 from .data.game_obj import GameObject
 from .data import const
+from .data.rect import Rect
 
 from . import camera
 from . import scenes
 from . import debug
 from . import transitions
 from . import window
-from .data.rect import Rect
+from . import ui
 
 from typing import List, Optional
 
@@ -20,7 +21,7 @@ class App:
         Initializes the engine and creates:
             - a window
             - a main scene
-            - cameras (game, minimap and UI)
+            - a camera named game_camera
         Args:
             title (str): title of the game window
             w_width (int): window width
@@ -53,6 +54,8 @@ class App:
         self._scenes: List[scenes.Scene] = []
         # list of all playing transitions
         self._transitions: List[transitions.Transition] = []
+        # list of all menus
+        self._menus: List[ui.Menu] = []
 
         self._default_view: camera.Camera = camera.Camera("default_view", -1)
         self._default_view.reset((0, 0), (v_width, v_height))
@@ -96,6 +99,10 @@ class App:
     @property
     def transitions(self) -> List[transitions.Transition]:
         return self._transitions
+
+    @property
+    def menus(self) -> List[ui.Menu]:
+        return self._menus
 
     def create_scene(self, width: int, height: int):
         """
@@ -160,7 +167,7 @@ class App:
     def toggle_fullscreen(self):
         if not self.fullscreen:
             self.window.close()
-            self._window = sf.RenderWindow(sf.VideoMode(const.SCREEN_W, const.SCREEN_H), self.name, sf.Style.NONE)
+            self._window = window.RenderWindow(sf.VideoMode(const.SCREEN_W, const.SCREEN_H), self.name, sf.Style.NONE)
             self.window.framerate_limit = self.desired_fps
             self.window.mouse_cursor_visible = False
             self.window.vertical_synchronization = True
@@ -169,7 +176,7 @@ class App:
             self.scale_view()
         else:
             self.window.close()
-            self._window = sf.RenderWindow(sf.VideoMode(self.W_WIDTH, self.W_HEIGHT), self.name, sf.Style.DEFAULT)
+            self._window = window.RenderWindow(sf.VideoMode(self.W_WIDTH, self.W_HEIGHT), self.name, sf.Style.DEFAULT)
             self.window.framerate_limit = self.desired_fps
             self.window.mouse_cursor_visible = True
             self.window.vertical_synchronization = True
@@ -208,9 +215,7 @@ class App:
         Args:
             event (sf.Event): a window event
         """
-        if event == sf.Event.CLOSED:
-            self.window.close()
-        elif event == sf.Event.KEY_PRESSED:
+        if event == sf.Event.KEY_PRESSED:
             if event['code'] not in self.inputs:
                 self.inputs.insert(0, event['code'])
         elif event == sf.Event.KEY_RELEASED:
@@ -254,6 +259,9 @@ class App:
         for transition in self.transitions:
             transition.update()
             self.window.draw(transition)
+        for menu in self.menus:
+            menu.update()
+            self.window.draw(menu)
 
     def run(self):
         """
@@ -264,8 +272,12 @@ class App:
             self.window.title = self.name+" - FPS:" + str(round(1 / self.dt))
 
             for event in self.window.events:
-                self._store_inputs(event)
-                self.event_handler(event)
+                if not self._menus:
+                    self._store_inputs(event)
+                    self.event_handler(event)
+                else:
+                    self._inputs = []
+                    self._menus[-1].event_handler(event)
 
             self.update()
 

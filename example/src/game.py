@@ -6,7 +6,7 @@ from example.src import entities
 
 class MyGame(ns.App):
     def __init__(self):
-        super().__init__("pySFML Game Engine - Example Game", 960, 576, 320, 192, 60)
+        super().__init__("NasNas - Example Game", 960, 576, 320, 192, 60)
 
         self.window.key_repeat_enabled = False
         self.window.vertical_synchronization = True
@@ -17,11 +17,11 @@ class MyGame(ns.App):
 
         self.scene = self.create_scene(self.level.width * 16, self.level.height * 16)
 
-        self.player = entities.Player()
+        self.player = entities.Player("Player 1")
         self.player.controls = {'right': ns.Keyboard.RIGHT, 'left': ns.Keyboard.LEFT, 'up': ns.Keyboard.UP, 'down': ns.Keyboard.DOWN}
         self.player.position = (2*16, 7*16)
 
-        self.player2 = entities.Player()
+        self.player2 = entities.Player("Player 2")
         self.player2.controls = {'right': ns.Keyboard.D, 'left': ns.Keyboard.Q, 'up': ns.Keyboard.Z, 'down': ns.Keyboard.S}
         self.player2.position = (25 * 16, 7 * 16)
 
@@ -43,6 +43,23 @@ class MyGame(ns.App):
         self.game_camera2 = self.create_camera("player2", 0, ns.Rect((0, 0), (self.V_WIDTH/2, self.V_HEIGHT)), ns.Rect((0.5, 0), (0.5, 1)))
         self.game_camera2.follow(self.player)
         self.game_camera2.scene = self.scene
+
+        btn_anim = ns.Anim([
+            ns.AnimFrame(ns.Rect((0, 0), (64, 32)), 400),
+            ns.AnimFrame(ns.Rect((0, 32), (64, 32)), 400)
+        ])
+        btn_style = ns.ui.ButtonStyle(width=64, height=32, background=ns.Res.btn, font=ns.Res.arial, anim=btn_anim, font_size=16)
+        self.btn = ns.ui.Button("Button", style=btn_style, position=(64, 32))
+        @self.btn.on_press
+        def btn_press():
+            print("Button PRESSED !")
+
+        self.btn2 = ns.ui.Button("Button", style=btn_style, position=(64, 32+34))
+        @self.btn2.on_press
+        def btn2_press():
+            print("Button 2 PRESSED !")
+
+        self.game_menu = ns.ui.Menu("test", self.btn, self.btn2)
 
         map_back_layer = ns.Layer("map_back", self.level.layers["back"])
         map_front_layer = ns.Layer("map_front", self.level.layers["front"])
@@ -95,6 +112,8 @@ class MyGame(ns.App):
             print("Window will close now !")
 
     def event_handler(self, event):
+        if event == sf.Event.CLOSED:
+            self.tr_out.start()
         if event == sf.Event.KEY_PRESSED:
             if event["code"] == sf.Keyboard.ESCAPE:
                 self.tr_out.start()
@@ -118,10 +137,11 @@ class MyGame(ns.App):
                     self.scene.remove_mask(self.mask)
                 else:
                     self.scene.add_mask(self.mask, 10)
+            elif event["code"] == ns.Keyboard.J:
+                self.game_menu.open()
 
     def update(self):
         self.level.update()
-
         for layer in self.scene.layers.values():
             for ent in layer:
                 if isinstance(ent, ns.entities.BaseEntity):

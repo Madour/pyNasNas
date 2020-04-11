@@ -1,16 +1,21 @@
 from sfml import sf
 from .data.game_obj import GameObject
 from .data import rect, keys
+from .sprites import Anim, AnimPlayer
+
+from typing import Dict
 
 
 class BaseEntity(GameObject, sf.Drawable):
-    def __init__(self, data):
+    def __init__(self, name: str, data):
         super().__init__()
         self.data = data
-        self.name = data.name
+        self.name = name
         self._anim_state = "idle"
 
-        self.anims = self.data.anims
+        self.anims: Dict[str, Anim] = self.data.anims
+        self.anim_player: AnimPlayer = AnimPlayer(self.anims[self._anim_state])
+        self.animate = False if self.anims is None else True
 
         self.sprite = sf.Sprite(self.data.texture)
         self.sprite.texture_rectangle = self.anims[self.anim_state].frames[0].rectangle
@@ -28,27 +33,21 @@ class BaseEntity(GameObject, sf.Drawable):
         self.collision_box_shape.position = (self.collision_box.left, self.collision_box.top)
         self.collision_box_shape.fill_color = sf.Color(200, 0, 0, 150)
 
-        self.animate = False
-        if self.anims is not None:
-            self.anim_index = 0
-            self.anim_clock = sf.Clock()
-            self.animate = True
 
     @property
     def anim_state(self):
-        return  self._anim_state
+        return self._anim_state
 
     @anim_state.setter
     def anim_state(self, value: str):
         if self._anim_state != value:
             if value in self.anims:
                 self._anim_state = value
-                self.anim_index = 0
-                self.anim_clock.restart()
-                self.sprite.texture_rectangle = self.anims[value].frames[0].rectangle
-                self.sprite.origin = self.anims[value].frames[0].origin
+                self.anim_player.play(self.anims[self._anim_state])
+                self.sprite.texture_rectangle = self.anim_player.active_frame.rectangle
+                self.sprite.origin = self.anim_player.active_frame.origin
             else:
-                raise KeyError(f"Entity {self.name} has no animation anim_state called {value}")
+                raise KeyError(f"Entity named {self.name} has no animation anim_state named {value}")
 
     @property
     def position(self):
@@ -98,21 +97,10 @@ class BaseEntity(GameObject, sf.Drawable):
         self.update_anim()
 
     def update_anim(self):
-        ended = False
-        if self.anim_clock.elapsed_time.milliseconds >= self.anims[self.anim_state].frames[self.anim_index].duration:
-            self.anim_index += 1
-            if self.anim_index >= self.anims[self.anim_state].frames_count:
-                if self.anims[self.anim_state].loop:
-                    self.anim_index = 0
-                else:
-                    ended = True
-                    self.anim_index -= 1
-
-            if not ended:
-                self.sprite.texture_rectangle = self.anims[self.anim_state].frames[self.anim_index].rectangle
-                self.sprite.origin = self.anims[self.anim_state].frames[self.anim_index].origin
-
-            self.anim_clock.restart()
+        self.anim_player.update()
+        if self.sprite.texture_rectangle != self.anim_player.active_frame.rectangle:
+            self.sprite.texture_rectangle = self.anim_player.active_frame.rectangle
+            self.sprite.origin = self.anim_player.active_frame.origin
 
     def draw(self, target, anim_states):
         target.draw(self.sprite, anim_states)
@@ -121,8 +109,8 @@ class BaseEntity(GameObject, sf.Drawable):
 
 
 class PlatformerEntity(BaseEntity):
-    def __init__(self, data):
-        super().__init__(data)
+    def __init__(self, name: str, data):
+        super().__init__(name, data)
         self.sprite.origin = self.anims[self.anim_state].frames[0].origin
 
         self.controls = {

@@ -1,5 +1,10 @@
 from sfml import sf
 
+from .utils import to_Vector2
+from .data.rect import Rect
+
+from typing import Union, Tuple, Optional
+
 
 class BitmapGlyph():
     def __init__(self, texture_rect, character, spacing):
@@ -9,13 +14,10 @@ class BitmapGlyph():
 
 
 class BitmapFont():
-    def __init__(self, texture: sf.Texture, char_size: tuple, chars_map=None, spacings_map=None):
+    def __init__(self, texture: sf.Texture, char_size: Union[Tuple[int, int], sf.Vector2], chars_map=None, spacings_map=None):
         self.texture = texture
 
-        if isinstance(char_size, tuple):
-            self.char_size = sf.Vector2(char_size[0], char_size[1])
-        else:
-            self.char_size = char_size
+        self.char_size = to_Vector2(char_size)
 
         self.chars_map = " ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
         if chars_map:
@@ -47,16 +49,20 @@ class BitmapFont():
 
 
 class BitmapText(sf.Drawable):
-    def __init__(self, string: str, font: BitmapFont = None):
+    def __init__(self, text: str, font: BitmapFont = None):
         super().__init__()
-        self._font = None
-        self.string = string
-        self.glyphs_sprites = []
-        if font:
-            if isinstance(font, BitmapFont):
-                self.font = font
-            else:
-                raise TypeError("BitmapText font argument should be a BitmapFont instance")
+        self._font: Optional[BitmapFont] = None
+        self._text = text
+        self._render_texture = sf.RenderTexture(1, 1)
+        self._sprite = sf.Sprite(self._render_texture.texture)
+        self._glyphs_sprites = []
+        if font is not None:
+            self.font = font
+        self.position = (0, 0)
+
+    @property
+    def text(self):
+        return self._text
 
     @property
     def font(self):
@@ -67,29 +73,53 @@ class BitmapText(sf.Drawable):
         if isinstance(value, BitmapFont):
             self._font = value
             x = 0
-            for character in self.string:
+            self._glyphs_sprites = []
+            for character in self.text:
                 glyph = self._font.get_glyph(character)
                 glyph_spr = self._font.get_glyph_sprite(character)
                 glyph_spr.position = (x, 0)
-                self.glyphs_sprites.append(glyph_spr)
+                self._glyphs_sprites.append(glyph_spr)
                 x += glyph.spacing
+            self.update()
+        else:
+            raise TypeError("BitmapText font argument should be a BitmapFont instance")
 
     @property
-    def position(self):
-        return self.glyphs_sprites[0].position
+    def position(self) -> sf.Vector2:
+        return self._sprite.position
 
     @position.setter
     def position(self, value):
-        if isinstance(value, tuple):
-            value = sf.Vector2(value[0], value[1])
-        i = 0
-        for spr in self.glyphs_sprites:
-            spr.position = value
-            value += sf.Vector2(self._font.get_glyph(self.string[i]).spacing, 0)
-            i += 1
+        self._sprite.position = to_Vector2(value)
+
+    @property
+    def origin(self):
+        return self._sprite.origin
+
+    @property
+    def width(self):
+        res = 0
+        for c in self.text:
+            res += self._font.get_glyph(c).spacing
+        return res
+
+    @property
+    def height(self):
+        return self._font.char_size.y
+
+    @property
+    def global_bounds(self):
+        return self._sprite.global_bounds
+
+    def update(self):
+        self._render_texture = sf.RenderTexture(self.width, self.height)
+        self._render_texture.clear(sf.Color.TRANSPARENT)
+        for spr in self._glyphs_sprites:
+            self._render_texture.draw(spr)
+        self._render_texture.display()
+        self._sprite.texture = self._render_texture.texture
 
     def draw(self, target, states):
         if self.font:
-            for spr in self.glyphs_sprites:
-                target.draw(spr)
+            target.draw(self._sprite, states)
 

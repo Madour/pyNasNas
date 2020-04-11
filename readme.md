@@ -11,9 +11,10 @@
  - [x] Debug text display in-game
  - [x] Transitions
  
+### In progress :
+ - [x] Menus and UI
  
 ### To do :
- - [ ] Menus and UI
  - [ ] Splash screens
  - [ ] Levels and game events management
  - [ ] In-game command line for debugging

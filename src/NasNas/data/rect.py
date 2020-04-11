@@ -1,8 +1,9 @@
 from sfml import sf
+from typing import Union, Tuple
 
 
 class Rect(sf.Rect):
-    def __init__(self, pos: tuple, size: tuple):
+    def __init__(self, pos: Union[Tuple[float, float], sf.Vector2], size: Union[Tuple[float, float], sf.Vector2]):
         super().__init__(pos, size)
 
     @property

@@ -4,8 +4,8 @@ from example.src.data.sprites import Sprites
 
 
 class Player(ns.entities.PlatformerEntity):
-    def __init__(self):
-        super().__init__(Sprites.character)
+    def __init__(self, name):
+        super().__init__(name, Sprites.character)
         self.jump_velocity = sf.Vector2(0, -15)
 
     def update(self, dt, inputs = None):

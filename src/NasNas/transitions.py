@@ -29,9 +29,10 @@ class Transition(GameObject, sf.Drawable):
         return self.render_texture.size.y
 
     def start(self):
-        self.started = True
-        self.game.transitions.append(self)
-        self._callbacks["on_start"]()
+        if not self.started:
+            self.started = True
+            self.game.transitions.append(self)
+            self._callbacks["on_start"]()
 
     def on_start(self, fn):
         @wraps(fn)
@@ -41,9 +42,10 @@ class Transition(GameObject, sf.Drawable):
         return wrapper
 
     def end(self):
-        self.ended = True
-        self._callbacks["on_end"]()
-        self.game.transitions.remove(self)
+        if not self.ended:
+            self.ended = True
+            self._callbacks["on_end"]()
+            self.game.transitions.remove(self)
 
     def on_end(self, fn):
         wraps(fn)
