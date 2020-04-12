@@ -1,5 +1,6 @@
-from sfml import sf
 from typing import Union, Tuple
+
+from sfml import sf
 
 
 class Rect(sf.Rect):

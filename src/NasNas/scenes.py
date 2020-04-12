@@ -1,15 +1,18 @@
+from typing import Dict
+
+from sfml import sf
+
 from .data.game_obj import GameObject
 from . import layers
-from sfml import sf
-from typing import Dict
+
 
 class Scene(GameObject, sf.Drawable):
     def __init__(self, width: int, height: int):
         super().__init__()
-        self.render_texture : sf.RenderTexture = sf.RenderTexture(width, height)
-        self.sprite : sf.Sprite = sf.Sprite(self.render_texture.texture)
-        self.layers : Dict[int, layers.Layer]= {}
-        self.masks : Dict[int, layers.Mask] = {}
+        self.render_texture: sf.RenderTexture = sf.RenderTexture(width, height)
+        self.sprite: sf.Sprite = sf.Sprite(self.render_texture.texture)
+        self.layers: Dict[int, layers.Layer] = {}
+        self.masks: Dict[int, layers.Mask] = {}
 
     @property
     def width(self) -> int:
@@ -31,7 +34,7 @@ class Scene(GameObject, sf.Drawable):
     def remove_layer(self, layer: layers.Layer = None, order: int = None):
         if layer:
             if layer in self.layers.values():
-                self.layers = {key:val for key, val in self.layers.items() if val != layer}
+                self.layers = {key: val for key, val in self.layers.items() if val != layer}
         elif order:
             if order in self.layers.keys():
                 self.layers.pop(order)
@@ -56,7 +59,7 @@ class Scene(GameObject, sf.Drawable):
 
     def remove_mask(self, mask: layers.Mask):
         if mask in self.masks.values():
-            self.masks = {key:val for key,val in self.masks.items() if val != mask}
+            self.masks = {key: val for key, val in self.masks.items() if val != mask}
 
     def _render(self):
         self.render_texture.clear(sf.Color.TRANSPARENT)
@@ -77,4 +80,3 @@ class Scene(GameObject, sf.Drawable):
 
     def draw(self, target, states):
         target.draw(self.sprite)
-

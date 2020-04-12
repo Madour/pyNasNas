@@ -1,12 +1,13 @@
+from typing import Union, Tuple, List
+
 from sfml import sf
+
 from .data.rect import Rect
 from .utils import to_Vector2
 
-from typing import Union, Tuple, List
-
 
 class AnimFrame:
-    def __init__(self, rectangle: Rect, duration: int, origin: Union[Tuple[int, int], sf.Vector2]=(0, 0)):
+    def __init__(self, rectangle: Rect, duration: int, origin: Union[Tuple[int, int], sf.Vector2] = (0, 0)):
         self.rectangle: Rect = rectangle    # texture rectangle of the frame
         self.duration: int = duration       # duration of the frame in milliseconds
         self.origin: Union[Tuple[int, int], sf.Vector2] = to_Vector2(origin)    # origin of the frame

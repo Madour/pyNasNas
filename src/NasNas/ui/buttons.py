@@ -1,11 +1,11 @@
+from typing import Union, Tuple
+
 from sfml import sf
 
 from ..data.callbacks import HasCallbacks, callback
-from ..utils import to_Vector2
 from ..sprites import Anim, AnimPlayer
 from ..text import BitmapText, BitmapFont
-
-from typing import Union, Tuple
+from ..utils import to_Vector2
 
 
 class ButtonStyle:

@@ -1,8 +1,8 @@
+from typing import Dict
 from xml.etree import ElementTree
+
 from .resource_path import find_resource
 from ..tilemapping.tilesets import Tileset
-
-from typing import Dict
 
 
 class TilesetManagerMeta(type):

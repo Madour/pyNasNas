@@ -1,11 +1,11 @@
-from sfml import sf
+from typing import List, Dict, Union, Optional
 from xml.etree import ElementTree
+
+from sfml import sf
 
 from ..data.rect import Rect
 from ..data.shapes import EllipseShape, LineShape
 from .tiles import Tile
-
-from typing import List, Dict, Union, Optional
 
 
 class TileLayer(sf.Drawable):

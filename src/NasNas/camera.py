@@ -1,9 +1,11 @@
+from typing import Union, Optional, Tuple
+import random
+
 from sfml import sf
-import random as rand
+
 from .data.game_obj import GameObject
 from .data.rect import Rect
-
-from typing import Union, Optional
+from .utils import to_Vector2
 
 
 class Camera(GameObject, sf.View):
@@ -19,34 +21,22 @@ class Camera(GameObject, sf.View):
         self.vp_base_pos = sf.Vector2(0, 0)
         self.vp_base_size = sf.Vector2(1, 1)
         self.offset = sf.Vector2(0, 0)
-        self.visible : bool = True
+        self.visible: bool = True
         self._scene = []
 
-    def reset(self, position: Union[sf.Vector2, tuple], size: Union[sf.Vector2, tuple]):
+    def reset(self, position: Union[sf.Vector2, Tuple[float, float]], size: Union[sf.Vector2, Tuple[float, float]]):
         if type(position) in [sf.Vector2, tuple] and type(size) in [sf.Vector2, tuple]:
             super().reset(sf.Rect(position, size))
-            if isinstance(position, sf.Vector2):
-                self.base_pos = position
-            else:
-                self.base_pos = sf.Vector2(position[0], position[1])
-            if isinstance(size, sf.Vector2):
-                self.base_size = size
-            else:
-                self.base_size = sf.Vector2(size[0], size[1])
+            self.base_pos = to_Vector2(position)
+            self.base_size = to_Vector2(size)
         else:
             raise TypeError("position and size arguments of Camera.reset() should be a sf.Vector or tuple.")
 
-    def reset_viewport(self,position: Union[sf.Vector2, tuple], size: Union[sf.Vector2, tuple]):
+    def reset_viewport(self, position: Union[sf.Vector2, Tuple[float, float]], size: Union[sf.Vector2, Tuple[float, float]]):
         if type(position) in [sf.Vector2, tuple] and type(size) in [sf.Vector2, tuple]:
             self.viewport = sf.Rect(position, size)
-            if isinstance(position, sf.Vector2):
-                self.vp_base_pos = position
-            else:
-                self.vp_base_pos = sf.Vector2(position[0], position[1])
-            if isinstance(size, sf.Vector2):
-                self.vp_base_size = size
-            else:
-                self.vp_base_size = sf.Vector2(size[0], size[1])
+            self.vp_base_pos = to_Vector2(position)
+            self.vp_base_size = to_Vector2(size)
         else:
             raise TypeError("position and size arguments of Camera.reset_viewport() should be a sf.Vector or tuple.")
 
@@ -113,11 +103,11 @@ class Camera(GameObject, sf.View):
     def follow(self, entity):
         self.reference = entity
 
-    def quake(self, duration: float, amplitude: int, horizontal:bool=True, vertical:bool=True):
+    def quake(self, duration: float, amplitude: int, horizontal: bool = True, vertical: bool = True):
         self.state = QuakeState(duration, amplitude, horizontal, vertical)
 
-    def update(self, dt):
-        self.move( - self.offset.x, - self.offset.y)
+    def update(self):
+        self.move(- self.offset.x, - self.offset.y)
 
         if self.reference:
             dif = self.reference.position - self.center - self.offset
@@ -160,7 +150,7 @@ class CameraState:
 
 
 class QuakeState(CameraState):
-    def __init__(self, duration:float, amplitude:int, horizontal:bool=True, vertical:bool=True):
+    def __init__(self, duration: float, amplitude: int, horizontal: bool = True, vertical: bool = True):
         super().__init__()
         self.name = "quake"
         self.duration = duration
@@ -172,8 +162,6 @@ class QuakeState(CameraState):
     @property
     def offset(self) -> sf.Vector2:
         ratio = 1 - self.timer.elapsed_time.seconds/self.duration
-        offx = rand.randrange(-self.amplitude, self.amplitude, 1)
-        offy = rand.randrange(-self.amplitude, self.amplitude, 1)
+        offx = random.randrange(-self.amplitude, self.amplitude, 1)
+        offy = random.randrange(-self.amplitude, self.amplitude, 1)
         return sf.Vector2(offx*self.direction.x*ratio, offy*self.direction.y*ratio)
-
-

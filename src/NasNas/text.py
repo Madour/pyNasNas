@@ -1,19 +1,19 @@
+from typing import Union, Tuple, Optional
+
 from sfml import sf
 
 from .utils import to_Vector2
 from .data.rect import Rect
 
-from typing import Union, Tuple, Optional
 
-
-class BitmapGlyph():
+class BitmapGlyph:
     def __init__(self, texture_rect, character, spacing):
         self.texture_rectangle = texture_rect
         self.character = character
         self.spacing = spacing
 
 
-class BitmapFont():
+class BitmapFont:
     def __init__(self, texture: sf.Texture, char_size: Union[Tuple[int, int], sf.Vector2], chars_map=None, spacings_map=None):
         self.texture = texture
 
@@ -36,7 +36,7 @@ class BitmapFont():
                     spacing = self.char_size.x
                     if character in self.spacings_map:
                         spacing = self.spacings_map[character]
-                    self.glyphs[character] = BitmapGlyph(sf.Rect((x, y), self.char_size), character, spacing)
+                    self.glyphs[character] = BitmapGlyph(Rect((x, y), self.char_size), character, spacing)
                 i += 1
 
     def get_glyph(self, character: str) -> BitmapGlyph:
@@ -122,4 +122,3 @@ class BitmapText(sf.Drawable):
     def draw(self, target, states):
         if self.font:
             target.draw(self._sprite, states)
-

@@ -1,9 +1,11 @@
-from sfml import sf
-import os
-from .resource_path import find_resource
 from typing import Dict, Union
-from .tileset_manager import TilesetManager
+import os
+
+from sfml import sf
+
 from ..tilemapping import tiledmap as tm
+from .resource_path import find_resource
+from .tileset_manager import TilesetManager
 
 
 def load_resources(obj, path):
@@ -41,16 +43,16 @@ def load_resources(obj, path):
                 TilesetManager.load_tsx(find_resource(os.path.join(path, file)))
 
         elif os.path.isdir(os.path.join(path, file)):
-            dir = Dir(filename, parent=obj)
-            load_resources(dir, os.path.join(path, file))
-            setattr(obj, filename, dir)
+            directory = Dir(filename, parent=obj)
+            load_resources(directory, os.path.join(path, file))
+            setattr(obj, filename, directory)
 
 
 class Dir:
-    def __init__(self, name, parent = None):
+    def __init__(self, name, parent=None):
         self._name = name
         self._parent = parent
-        self._data : Dict[str, Union[Dir, sf.Texture, tm.TiledMap, sf.Font]] = {}
+        self._data: Dict[str, Union[Dir, sf.Texture, tm.TiledMap, sf.Font]] = {}
 
     def __getattr__(self, item) -> Union[sf.Font, sf.Texture, tm.TiledMap]:
         if item[0] == '_':
@@ -91,9 +93,9 @@ class Dir:
     def print_tree(self, indent=0):
         items = [i for i in self.items()]
         dirs = [d for d in items if isinstance(d[1], Dir)]
-        dirs.sort(key=lambda x:x[0])
+        dirs.sort(key=lambda x: x[0])
         files = [f for f in items if not isinstance(f[1], Dir)]
-        files.sort(key=lambda x:x[0])
+        files.sort(key=lambda x: x[0])
 
         for name, val in dirs:
             print(("│" + " " * 3) * (indent - 1), end='')

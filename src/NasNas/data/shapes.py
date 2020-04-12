@@ -1,9 +1,9 @@
-from sfml import sf
+from typing import Union, Tuple
 import math
 
-from ..utils import to_Vector2
+from sfml import sf
 
-from typing import Union, Tuple
+from ..utils import to_Vector2
 
 
 class LineShape(sf.Drawable):
@@ -61,10 +61,10 @@ class LineShape(sf.Drawable):
             for vertex in self._vertexarray:
                 vertex.position += self._position
         if not color and not append and not offset:
-                self._vertexarray.resize(self.point_count)
-                for i in range(self.point_count):
-                    self._vertexarray[i].position = self._points[i]
-                    self._vertexarray[i].color = self._color
+            self._vertexarray.resize(self.point_count)
+            for i in range(self.point_count):
+                self._vertexarray[i].position = self._points[i]
+                self._vertexarray[i].color = self._color
 
     def draw(self, target, states):
         target.draw(self._vertexarray, states)

@@ -1,6 +1,8 @@
 from sfml import sf
+
 from .data.game_obj import GameObject
 from . import transitions
+
 
 class Layer(GameObject, sf.Drawable):
     """
@@ -31,7 +33,7 @@ class Layer(GameObject, sf.Drawable):
     def ysort(self):
         """Sort all drawables of the layer by y position
         """
-        self._drawables.sort(key=lambda x:x.position.y)
+        self._drawables.sort(key=lambda x: x.position.y)
 
     def update(self):
         to_remove = []

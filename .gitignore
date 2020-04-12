@@ -1,11 +1,11 @@
 .idea
 .git
-doc
-wiki
+__pycache__/
 build
 dist
+doc
+ignored
+wiki
 *.egg
 *.egg-info
-ignored
-__pycache__/
 *.py[cod]

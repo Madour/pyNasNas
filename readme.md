@@ -44,10 +44,14 @@ Then you can, import the framework with:
 import src.NasNas as ns
 ```
 
-### How to use
+### Get started
 
-Visit the [wiki](https://github.com/Madour/pySFMLGameEngine/wiki) to learn how to use it.
+Visit the [wiki](https://github.com/Madour/pySFMLGameEngine/wiki) to get started.
 
 You can also take a look at the example project to see how to use it.
 
 Be sure to run run_example.py from example folder like this : `python3 ../run_example.py`
+
+### Author
+
+ - Modar Nasser

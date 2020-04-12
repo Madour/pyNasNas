@@ -1,9 +1,10 @@
+from typing import Dict
+
 from sfml import sf
+
 from .data.game_obj import GameObject
 from .data import rect, keys
 from .sprites import Anim, AnimPlayer
-
-from typing import Dict
 
 
 class BaseEntity(GameObject, sf.Drawable):

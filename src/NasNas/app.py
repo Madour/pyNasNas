@@ -1,3 +1,5 @@
+from typing import List, Optional
+
 from sfml import sf
 
 from .data.game_obj import GameObject
@@ -10,8 +12,6 @@ from . import debug
 from . import transitions
 from . import window
 from . import ui
-
-from typing import List, Optional
 
 
 class App:
@@ -246,7 +246,7 @@ class App:
         for scene in self.scenes:
             scene._render()
         for cam in self.cameras:
-            cam.update(self.dt)
+            cam.update()
         self.cameras.sort(key=lambda x: x.render_order)
         for cam in self.cameras:
             if cam.visible:

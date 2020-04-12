@@ -1,13 +1,14 @@
-from sfml import sf
-from xml.etree import ElementTree
+from typing import Dict, Union, List, Optional
 import os
+from xml.etree import ElementTree
+
+from sfml import sf
+
 from ..reslib.resource_path import split_path
 
-from typing import Dict, Union, List, Optional
 
-
-# base class for tilesets, called when loading an external tileset
 class Tileset:
+    """ Base class for tilesets, called when loading an external tileset """
     def __init__(self, xml: ElementTree.Element, path: str):
         self.xml_root: ElementTree.Element = xml
         self.path = path
@@ -72,8 +73,8 @@ class Tileset:
                         )
 
 
-# when loading a TiledMap, a MapTileset are created for each tileset used in the map
 class MapTileset:
+    """ When loading a TiledMap, a MapTileset is created for each tileset used in the map """
     def __init__(self, tileset: Tileset, firstgid: int):
         self._data: Tileset = tileset
         self._first_gid: int = firstgid

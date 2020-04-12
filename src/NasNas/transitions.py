@@ -1,10 +1,10 @@
+import math
+import random
+
 from sfml import sf
 
 from .data.callbacks import callback, HasCallbacks
 from .data.game_obj import GameObject
-
-import math
-import random
 
 
 class Transition(GameObject, HasCallbacks, sf.Drawable):
@@ -60,7 +60,6 @@ class Transition(GameObject, HasCallbacks, sf.Drawable):
                     self.render_texture.draw(shape, sf.RenderStates(self.blend_mode))
                 self.render_texture.display()
                 self.sprite.texture = self.render_texture.texture
-
         return _decorate
 
     def update(self):
@@ -170,8 +169,9 @@ class RotatingSquareOpen(Transition):
             self.shape.rotate(self.speed*2)
         self.shape.origin = (self.shape.size.x/2, self.shape.size.y/2)
 
+
 class RotatingSquareClose(Transition):
-    def __init__(self, speed:int=5):
+    def __init__(self, speed: int = 5):
         super().__init__()
         self.speed = speed
         self.shape = sf.RectangleShape()

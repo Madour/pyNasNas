@@ -1,7 +1,9 @@
+import inspect
+
 from sfml import sf
+
 from .reslib import Res
 from .data.game_obj import GameObject
-import inspect
 
 
 class Logger(GameObject):

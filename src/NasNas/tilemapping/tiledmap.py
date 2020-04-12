@@ -1,6 +1,8 @@
+from typing import List, Dict
 import os
-from sfml import sf
 from xml.etree import ElementTree
+
+from sfml import sf
 
 from ..data.game_obj import GameObject
 from ..data.rect import Rect
@@ -8,8 +10,6 @@ from ..reslib.resource_path import find_resource
 from ..reslib.tileset_manager import TilesetManager
 from .tilesets import Tileset, MapTileset
 from .layers import TileLayer, ObjectGroup
-
-from typing import List, Dict
 
 
 class TiledMap(GameObject):

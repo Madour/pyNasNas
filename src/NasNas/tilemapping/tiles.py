@@ -1,7 +1,8 @@
-from sfml import sf
-from .tilesets import MapTileset
-
 from typing import List, Optional
+
+from sfml import sf
+
+from .tilesets import MapTileset
 
 
 class TileTransformation:

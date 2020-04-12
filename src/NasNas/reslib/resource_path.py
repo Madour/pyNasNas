@@ -1,4 +1,5 @@
-import sys, os
+import sys
+import os
 
 ABSOLUTE_PATH = sys.path[0]
 RES_DIR = "assets"

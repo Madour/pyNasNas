@@ -1,17 +1,17 @@
+from typing import List
+
 from sfml import sf
 
 from ..data.game_obj import GameObject
 from ..data.keys import Keyboard
 from .buttons import Button
 
-from typing import List
-
 
 class Menu(GameObject, sf.Drawable):
     def __init__(self, name: str, *args: Button):
         super().__init__()
         self.name = name
-        self._buttons: List[Button]= []
+        self._buttons: List[Button] = []
         self._cursor_index = 0
         self.opened = False
         for arg in args:

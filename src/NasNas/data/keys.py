@@ -1,5 +1,6 @@
 from sfml import sf
 
+
 class Keyboard(sf.Keyboard):
     """
     Keyboard keys

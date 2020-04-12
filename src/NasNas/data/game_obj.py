@@ -1,3 +1,2 @@
 class GameObject:
     game = None
-

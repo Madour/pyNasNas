@@ -1,5 +1,6 @@
-import src.NasNas as ns
 from sfml import sf
+import src.NasNas as ns
+
 from example.src.data.sprites import Sprites
 
 
