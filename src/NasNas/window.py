@@ -1,31 +1,32 @@
 from sfml import sf
+
+from .data.callbacks import callback, HasCallbacks
 from .data.game_obj import GameObject
-from functools import wraps
+from .camera import Camera
 
 
-class RenderWindow(GameObject, sf.RenderWindow):
+class RenderWindow(GameObject, HasCallbacks, sf.RenderWindow):
     def __init__(self, videomode: sf.VideoMode, title: str, style: sf.Style = sf.Style.DEFAULT):
         super().__init__(videomode, title, style)
         self.style = style
         self.base_videomode = videomode
         self.base_size = sf.Vector2(videomode.width, videomode.height)
         self.base_title = title
-        self._callbacks = {"on_close": lambda: None}
+        self._ui_view = Camera("ui_view", -1)
+        self._ui_view.reset((0, 0), (self.game.V_WIDTH, self.game.V_HEIGHT))
+        self._ui_view.reset_viewport((0, 0), (1, 1))
 
-    def on_close(self, fn):
-        @wraps(fn)
-        def wrapper():
-            return fn()
+    @property
+    def ui_view(self):
+        return self._ui_view
 
-        self._set_close_callback(wrapper)
-        return wrapper
+    @callback("on_close")
+    def on_close(self, user_fn):
+        return user_fn
 
     def close(self):
-        self._callbacks["on_close"]()
         super().close()
+        self.callbacks.call("on_close")
 
     def on_resize(self):
         self.game.scale_view()
-
-    def _set_close_callback(self, fn, ):
-        self._callbacks["on_close"] = fn

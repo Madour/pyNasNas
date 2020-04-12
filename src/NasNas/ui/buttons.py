@@ -1,9 +1,10 @@
 from sfml import sf
+
+from ..data.callbacks import HasCallbacks, callback
 from ..utils import to_Vector2
 from ..sprites import Anim, AnimPlayer
 from ..text import BitmapText, BitmapFont
 
-from functools import wraps
 from typing import Union, Tuple
 
 
@@ -31,8 +32,9 @@ class ButtonStyle:
         self.anim = anim
 
 
-class Button(sf.Drawable):
-    def __init__(self, text: str, style:ButtonStyle = ButtonStyle(), position: Union[Tuple[float, float], sf.Vector2] = (0, 0)):
+class Button(HasCallbacks, sf.Drawable):
+    def __init__(self, text: str, style: ButtonStyle = ButtonStyle(),
+                 position: Union[Tuple[float, float], sf.Vector2] = (0, 0)):
         super().__init__()
         self._text = text
         self._position = to_Vector2(position)
@@ -40,7 +42,6 @@ class Button(sf.Drawable):
         self._render_texture = sf.RenderTexture(self._style.width, self._style.height)
         self.anim_player = AnimPlayer(self._style.anim)
 
-        self._callbacks = {"on_press": lambda: None}
         self._create()
 
     @property
@@ -70,19 +71,16 @@ class Button(sf.Drawable):
         else:
             self._front = BitmapText(self._text, self._style.font)
             self._front.font = self._style.font
-        self._front.position = self._position + self._style.size/2 \
-                               - sf.Vector2(self._front.global_bounds.width/2, self._front.global_bounds.height/2) \
+        self._front.position = self._position + self._style.size / 2 \
+                               - sf.Vector2(self._front.global_bounds.width / 2, self._front.global_bounds.height / 2) \
                                - sf.Vector2(self._front.global_bounds.left, self._front.global_bounds.top)
 
-    def on_press(self, fn):
-        @wraps(fn)
-        def wrapper():
-            return fn()
-        self._callbacks["on_press"] = wrapper
-        return wrapper
+    @callback("on_press")
+    def on_press(self, user_fn):
+        return user_fn
 
     def press(self):
-        self._callbacks["on_press"]()
+        self.callbacks.call("on_press")
 
     def update(self):
         if isinstance(self._bg, sf.Sprite):

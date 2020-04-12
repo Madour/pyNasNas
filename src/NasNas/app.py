@@ -57,10 +57,6 @@ class App:
         # list of all menus
         self._menus: List[ui.Menu] = []
 
-        self._default_view: camera.Camera = camera.Camera("default_view", -1)
-        self._default_view.reset((0, 0), (v_width, v_height))
-        self._default_view.reset_viewport((0, 0), (1, 1))
-
         # Scene is where everything is drawn on
         self.scene = self.create_scene(w_width, w_height)
 
@@ -69,9 +65,9 @@ class App:
 
         # clock and dt used for FPS calculation
         self.clock = sf.Clock()
-        self.dt = 0
+        self.dt = 1.0
 
-        self.debug = True
+        self.debug = False
         self.debug_texts = []  # list of DebugText
 
         self.scale_view()
@@ -200,11 +196,15 @@ class App:
             viewport_h = (float(self.window.size.x) / (self.W_WIDTH / self.W_HEIGHT)) / float(self.window.size.y)
             viewport_x = 0
             viewport_y = (1-viewport_h)/2
-        for cam in self.cameras:
-            cam.viewport = sf.Rect(
-                (viewport_x + cam.vp_base_pos.x*(1-2*viewport_x), viewport_y + cam.vp_base_pos.y*(1-2*viewport_y)),
-                (viewport_w * cam.vp_base_size.x, viewport_h * cam.vp_base_size.y)
+
+        def new_viewport(x):
+            return sf.Rect(
+                (viewport_x + x.vp_base_pos.x * (1 - 2 * viewport_x), viewport_y + x.vp_base_pos.y * (1 - 2 * viewport_y)),
+                (viewport_w * x.vp_base_size.x, viewport_h * x.vp_base_size.y)
             )
+        for cam in self.cameras:
+            cam.viewport = new_viewport(cam)
+        self.window.ui_view.viewport = new_viewport(self.window.ui_view)
 
     def _store_inputs(self, event: sf.Event):
         """
@@ -255,7 +255,7 @@ class App:
                     self.window.draw(cam.scene)
 
         # drawing transitions on top of everything else directly on the window
-        self.window.view = self._default_view
+        self.window.view = self.window.ui_view
         for transition in self.transitions:
             transition.update()
             self.window.draw(transition)

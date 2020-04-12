@@ -1,16 +1,18 @@
 from sfml import sf
+
+from .data.callbacks import callback, HasCallbacks
 from .data.game_obj import GameObject
+
 import math
 import random
-from functools import wraps
 
 
-class Transition(GameObject, sf.Drawable):
+class Transition(GameObject, HasCallbacks, sf.Drawable):
     def __init__(self):
         if self.__class__.__name__ == __class__.__name__:
             raise NotImplementedError("Transition class is not instantiable. Please use inheritance to create a Transition.")
         super().__init__()
-        self.render_texture = sf.RenderTexture(self.game._default_view.size.x, self.game._default_view.size.y)
+        self.render_texture = sf.RenderTexture(self.game.window.ui_view.size.x, self.game.window.ui_view.size.y)
         self.r = self.g = self.b = 0
         self.a = 255
         self.blend_mode = sf.BLEND_NONE
@@ -18,7 +20,6 @@ class Transition(GameObject, sf.Drawable):
         self.sprite = sf.Sprite(self.render_texture.texture)
         self.ended = False
         self.started = False
-        self._callbacks = {"on_start": lambda: None, "on_end": lambda: None}
 
     @property
     def width(self):
@@ -32,30 +33,24 @@ class Transition(GameObject, sf.Drawable):
         if not self.started:
             self.started = True
             self.game.transitions.append(self)
-            self._callbacks["on_start"]()
+            self.callbacks.call("on_start")
 
-    def on_start(self, fn):
-        @wraps(fn)
-        def wrapper():
-            return fn()
-        self._callbacks["on_start"] = wrapper
-        return wrapper
+    @callback("on_start")
+    def on_start(self, user_fn):
+        return user_fn
 
     def end(self):
         if not self.ended:
             self.ended = True
-            self._callbacks["on_end"]()
             self.game.transitions.remove(self)
+            self.callbacks.call("on_end")
 
-    def on_end(self, fn):
-        wraps(fn)
-        def wrapper():
-            return fn()
-        self._callbacks["on_end"] = wrapper
-        return wrapper
+    @callback("on_end")
+    def on_end(self, user_fn):
+        return user_fn
 
     @staticmethod
-    def update_handler(update_func):
+    def updater(update_func):
         def _decorate(self):
             if not self.ended:
                 self.render_texture.clear(sf.Color(self.r, self.g, self.b, self.a))
@@ -83,7 +78,7 @@ class FadeIn(Transition):
         self.speed = speed
         self.update()
 
-    @Transition.update_handler
+    @Transition.updater
     def update(self):
         self.a -= self.speed
         if self.a <= 0:
@@ -99,7 +94,7 @@ class FadeOut(Transition):
         self.speed = speed
         self.update()
 
-    @Transition.update_handler
+    @Transition.updater
     def update(self):
         self.a += self.speed
         if self.a >= 255:
@@ -119,7 +114,7 @@ class CircleOpen(Transition):
         self.shapes.append(self.shape)
         self.update()
 
-    @Transition.update_handler
+    @Transition.updater
     def update(self):
         if self.shape.radius > self.limit:
             self.end()
@@ -142,7 +137,7 @@ class CircleClose(Transition):
         self.shapes.append(self.shape)
         self.update()
 
-    @Transition.update_handler
+    @Transition.updater
     def update(self):
         if self.shape.radius == 0:
             self.end()
@@ -166,7 +161,7 @@ class RotatingSquareOpen(Transition):
         self.shapes.append(self.shape)
         self.update()
 
-    @Transition.update_handler
+    @Transition.updater
     def update(self):
         if self.shape.size.x/2 > self.limit:
             self.end()
@@ -187,7 +182,7 @@ class RotatingSquareClose(Transition):
         self.shapes.append(self.shape)
         self.update()
 
-    @Transition.update_handler
+    @Transition.updater
     def update(self):
         if self.shape.size.x == 0:
             self.end()
@@ -221,7 +216,7 @@ class PixelsIn(Transition):
                 self.remaining.append(s)
         self.update()
 
-    @Transition.update_handler
+    @Transition.updater
     def update(self):
         if self.remaining:
             for i in range(self.speed):
@@ -256,7 +251,7 @@ class PixelsOut(Transition):
                 self.remaining.append(s)
         self.update()
 
-    @Transition.update_handler
+    @Transition.updater
     def update(self):
         if self.remaining:
             for i in range(self.speed):
