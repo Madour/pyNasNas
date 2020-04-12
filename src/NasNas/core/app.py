@@ -2,16 +2,16 @@ from typing import List, Optional
 
 from sfml import sf
 
-from .data.game_obj import GameObject
-from .data import const
-from .data.rect import Rect
+from ..data.game_obj import GameObject
+from ..data import const
+from ..data.rect import Rect
+from .. import ui
 
 from . import camera
 from . import scenes
 from . import debug
 from . import transitions
 from . import window
-from . import ui
 
 
 class App:
@@ -244,7 +244,7 @@ class App:
         Internal usage only, do not override or call this method.
         """
         for scene in self.scenes:
-            scene._render()
+            scene.render()
         for cam in self.cameras:
             cam.update()
         self.cameras.sort(key=lambda x: x.render_order)

@@ -2,7 +2,7 @@ from typing import Union, Tuple, List
 
 from sfml import sf
 
-from .data.rect import Rect
+from ..data.rect import Rect
 from .utils import to_Vector2
 
 

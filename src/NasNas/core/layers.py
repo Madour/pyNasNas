@@ -1,6 +1,6 @@
 from sfml import sf
 
-from .data.game_obj import GameObject
+from ..data.game_obj import GameObject
 from . import transitions
 
 

@@ -3,9 +3,9 @@ from typing import Union, Tuple
 from sfml import sf
 
 from ..data.callbacks import HasCallbacks, callback
-from ..sprites import Anim, AnimPlayer
-from ..text import BitmapText, BitmapFont
-from ..utils import to_Vector2
+from ..core.sprites import Anim, AnimPlayer
+from ..core.text import BitmapText, BitmapFont
+from ..core.utils import to_Vector2
 
 
 class ButtonStyle:

@@ -2,7 +2,7 @@ from typing import Dict
 
 from sfml import sf
 
-from .data.game_obj import GameObject
+from ..data.game_obj import GameObject
 from . import layers
 
 
@@ -61,7 +61,7 @@ class Scene(GameObject, sf.Drawable):
         if mask in self.masks.values():
             self.masks = {key: val for key, val in self.masks.items() if val != mask}
 
-    def _render(self):
+    def render(self):
         self.render_texture.clear(sf.Color.TRANSPARENT)
 
         max_layers_order = max(self.layers.keys()) if self.layers.keys() else 0

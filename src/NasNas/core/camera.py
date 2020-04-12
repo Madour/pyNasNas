@@ -3,8 +3,8 @@ import random
 
 from sfml import sf
 
-from .data.game_obj import GameObject
-from .data.rect import Rect
+from ..data.game_obj import GameObject
+from ..data.rect import Rect
 from .utils import to_Vector2
 
 

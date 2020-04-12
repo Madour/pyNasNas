@@ -21,7 +21,7 @@ class MyGame(ns.App):
         self.level = ns.Res.Maps.level
         self.level.set_collisions_objectgroup("collisions")
 
-        # recreacting the scene, same size as the level
+        # recreating the scene, same size as the level
         self.scene = self.create_scene(self.level.width * 16, self.level.height * 16)
 
         # creating the players
@@ -107,11 +107,11 @@ class MyGame(ns.App):
         self.scene.add_layer(map_back_layer, 0)
 
         # creating the opening transition and starting it
-        self.tr_in = ns.transitions.CircleOpen(speed=8)
+        self.tr_in = ns.CircleOpenTransition(speed=8)
         self.tr_in.start()
 
-        # creating the closing transtition
-        self.tr_out = ns.transitions.RotatingSquareClose(speed=5)
+        # creating the closing transition
+        self.tr_out = ns.RotatingSquareCloseTransition(speed=5)
 
         # defining on_end callback of the closing transition
         @self.tr_out.on_end
@@ -170,7 +170,7 @@ class MyGame(ns.App):
         # updating entities
         for layer in self.scene.layers.values():
             for drawable in layer:
-                if isinstance(drawable, ns.entities.BaseEntity):
+                if isinstance(drawable, ns.BaseEntity):
                     drawable.update(self.dt, self.inputs)
             layer.ysort()
 

@@ -4,7 +4,7 @@ import src.NasNas as ns
 from example.src.data.sprites import Sprites
 
 
-class Player(ns.entities.PlatformerEntity):
+class Player(ns.PlatformerEntity):
     def __init__(self, name):
         super().__init__(name, Sprites.character)
         self.jump_velocity = sf.Vector2(0, -15)

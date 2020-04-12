@@ -3,8 +3,8 @@ import random
 
 from sfml import sf
 
-from .data.callbacks import callback, HasCallbacks
-from .data.game_obj import GameObject
+from ..data.callbacks import callback, HasCallbacks
+from ..data.game_obj import GameObject
 
 
 class Transition(GameObject, HasCallbacks, sf.Drawable):
@@ -69,7 +69,7 @@ class Transition(GameObject, HasCallbacks, sf.Drawable):
         target.draw(self.sprite)
 
 
-class FadeIn(Transition):
+class FadeInTransition(Transition):
     """ Fade transition from black screen to transparent"""
     def __init__(self, speed=5):
         super().__init__()
@@ -85,7 +85,7 @@ class FadeIn(Transition):
             self.end()
 
 
-class FadeOut(Transition):
+class FadeOutTransition(Transition):
     """ Fade transition from transparent to black screen"""
     def __init__(self, speed=5):
         super().__init__()
@@ -101,7 +101,7 @@ class FadeOut(Transition):
             self.end()
 
 
-class CircleOpen(Transition):
+class CircleOpenTransition(Transition):
     def __init__(self, speed=5):
         super().__init__()
         self.speed = speed
@@ -124,7 +124,7 @@ class CircleOpen(Transition):
         self.shape.origin = (self.shape.radius, self.shape.radius)
 
 
-class CircleClose(Transition):
+class CircleCloseTransition(Transition):
     """ Closing circle transition"""
     def __init__(self, speed=5):
         super().__init__()
@@ -147,7 +147,7 @@ class CircleClose(Transition):
         self.shape.origin = (self.shape.radius, self.shape.radius)
 
 
-class RotatingSquareOpen(Transition):
+class RotatingSquareOpenTransition(Transition):
     def __init__(self, speed=5):
         super().__init__()
         self.speed = speed
@@ -170,7 +170,7 @@ class RotatingSquareOpen(Transition):
         self.shape.origin = (self.shape.size.x/2, self.shape.size.y/2)
 
 
-class RotatingSquareClose(Transition):
+class RotatingSquareCloseTransition(Transition):
     def __init__(self, speed: int = 5):
         super().__init__()
         self.speed = speed
@@ -194,7 +194,7 @@ class RotatingSquareClose(Transition):
         self.shape.origin = (self.shape.size.x/2, self.shape.size.y/2)
 
 
-class PixelsIn(Transition):
+class PixelsInTransition(Transition):
     """ From black screen to transparent square by square """
     def __init__(self, speed: int, pixelsize: float):
         """ Warning : a small pixelsize and big speed will lead to severe frame drops.
@@ -229,7 +229,7 @@ class PixelsIn(Transition):
             self.end()
 
 
-class PixelsOut(Transition):
+class PixelsOutTransition(Transition):
     """ From transparent screen to black screen square by square """
     def __init__(self, speed: int, pixelsize: float):
         """ Warning : a small pixelsize and big speed will lead to severe frame drops.

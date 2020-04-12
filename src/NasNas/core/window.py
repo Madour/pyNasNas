@@ -1,7 +1,7 @@
 from sfml import sf
 
-from .data.callbacks import callback, HasCallbacks
-from .data.game_obj import GameObject
+from ..data.callbacks import callback, HasCallbacks
+from ..data.game_obj import GameObject
 from .camera import Camera
 
 

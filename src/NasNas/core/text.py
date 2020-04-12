@@ -2,8 +2,8 @@ from typing import Union, Tuple, Optional
 
 from sfml import sf
 
+from ..data.rect import Rect
 from .utils import to_Vector2
-from .data.rect import Rect
 
 
 class BitmapGlyph:

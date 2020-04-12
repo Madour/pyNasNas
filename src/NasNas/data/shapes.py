@@ -3,7 +3,7 @@ import math
 
 from sfml import sf
 
-from ..utils import to_Vector2
+from ..core.utils import to_Vector2
 
 
 class LineShape(sf.Drawable):
