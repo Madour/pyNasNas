@@ -2,37 +2,15 @@ from typing import Union, Tuple
 
 from sfml import sf
 
+from ..data.game_obj import GameObject
 from ..data.callbacks import HasCallbacks, callback
-from ..core.sprites import Anim, AnimPlayer
-from ..core.text import BitmapText, BitmapFont
+from ..core.sprites import AnimPlayer
+from ..core.text import BitmapText
 from ..core.utils import to_Vector2
+from .styles import ButtonStyle
 
 
-class ButtonStyle:
-    __slots__ = ["size", "width", "height", "padding", "font",
-                 "color", "font_size", "background", "anim"]
-
-    def __init__(self,
-                 width: int = 0, height: int = 0,
-                 padding: Tuple[int, int, int, int] = (0, 0, 0, 0),
-                 font: Union[sf.Font, BitmapFont] = None,
-                 color: sf.Color = sf.Color.WHITE,
-                 font_size: int = 16,
-                 background: Union[sf.Color, sf.Texture] = sf.Color.TRANSPARENT,
-                 anim: Anim = None,
-                 ):
-        self.width = width
-        self.height = height
-        self.size = sf.Vector2(self.width, self.height)
-        self.padding = padding
-        self.font = font
-        self.color = color
-        self.font_size = font_size
-        self.background = background
-        self.anim = anim
-
-
-class Button(HasCallbacks, sf.Drawable):
+class Button(GameObject, HasCallbacks, sf.Drawable):
     def __init__(self, text: str, style: ButtonStyle = ButtonStyle(),
                  position: Union[Tuple[float, float], sf.Vector2] = (0, 0)):
         super().__init__()
@@ -45,13 +23,23 @@ class Button(HasCallbacks, sf.Drawable):
         self._create()
 
     @property
+    def style(self):
+        return self._style
+
+    @property
+    def size(self):
+        return self._style.size
+
+    @property
     def position(self):
         return self._bg.position
 
     @position.setter
     def position(self, value):
-        self._position = value
-        self._create()
+        self._position = to_Vector2(value)
+        self._bg.position = self._position
+        self._front.position = self._position + self._style.size / 2 \
+                               - sf.Vector2(self._front.global_bounds.width / 2, self._front.global_bounds.height / 2)
 
     def _create(self):
         self.anim_player.play(self._style.anim)
@@ -71,7 +59,7 @@ class Button(HasCallbacks, sf.Drawable):
         else:
             self._front = BitmapText(self._text, self._style.font)
             self._front.font = self._style.font
-        self._front.position = self._position + self._style.size / 2 \
+        self._front.position = self._position + sf.Vector2(self.style.width, self.style.height) / 2\
                                - sf.Vector2(self._front.global_bounds.width / 2, self._front.global_bounds.height / 2) \
                                - sf.Vector2(self._front.global_bounds.left, self._front.global_bounds.top)
 

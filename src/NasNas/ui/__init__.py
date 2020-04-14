@@ -1,4 +1,9 @@
-from .buttons import ButtonStyle, Button
-from .menus import Menu
+from .styles import ButtonStyle, MenuStyle, BoxBorder
+from .buttons import Button
+from .menus import Menu, VerticalMenu
 
-__all__ = ['Menu', 'ButtonStyle', 'Button']
+__all__ = [
+    'ButtonStyle', 'MenuStyle', 'BoxBorder',
+    'Button',
+    'Menu', 'VerticalMenu'
+]

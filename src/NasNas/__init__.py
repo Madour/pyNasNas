@@ -18,3 +18,6 @@ __all__ = [
 
     'ui'
 ]
+
+__author__ = "Modar NASSER"
+__version__ = '0.1'

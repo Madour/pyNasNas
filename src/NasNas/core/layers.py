@@ -79,8 +79,12 @@ class Mask(GameObject, sf.Drawable):
 
     def update(self):
         self.render_texture.clear(self.fill_color)
+        temp_texture = sf.RenderTexture(self.render_texture.size.x, self.render_texture.size.y)
+        temp_texture.clear(self.fill_color)
         for drawable in self._drawables:
-            self.render_texture.draw(drawable, sf.RenderStates(sf.BLEND_NONE))
+            temp_texture.draw(drawable, sf.RenderStates(sf.BLEND_MULTIPLY))
+        temp_texture.display()
+        self.render_texture.draw(sf.Sprite(temp_texture.texture), sf.RenderStates(sf.BLEND_MULTIPLY))
         self.render_texture.display()
         self.sprite = sf.Sprite(self.render_texture.texture)
 

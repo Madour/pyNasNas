@@ -29,6 +29,10 @@ class Anim:
         self.frames_count = len(self.frames)
         self.loop = loop
 
+    def add(self, frame: AnimFrame):
+        self.frames.append(frame)
+        self.frames_count += 1
+
 
 class AnimPlayer:
     def __init__(self, animation: Anim):

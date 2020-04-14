@@ -228,7 +228,7 @@ class App:
         Override this method to make your own event handling
 
         Args:
-            event (sf.Event): a window event
+            event (sf.Event): a SFML event
         """
         pass
 
@@ -256,12 +256,12 @@ class App:
 
         # drawing transitions on top of everything else directly on the window
         self.window.view = self.window.ui_view
-        for transition in self.transitions:
-            transition.update()
-            self.window.draw(transition)
         for menu in self.menus:
             menu.update()
             self.window.draw(menu)
+        for transition in self.transitions:
+            transition.update()
+            self.window.draw(transition)
 
     def run(self):
         """

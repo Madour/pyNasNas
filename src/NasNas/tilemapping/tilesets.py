@@ -8,7 +8,7 @@ from ..reslib.resource_path import split_path
 
 
 class Tileset:
-    """ Base class for tilesets, called when loading an external tileset """
+    """ Base class for tilesets, called when loading a tileset """
     def __init__(self, xml: ElementTree.Element, path: str):
         self.xml_root: ElementTree.Element = xml
         self.path = path
@@ -72,6 +72,14 @@ class Tileset:
                             }
                         )
 
+    def get_tile_tex_coord(self, id: int):
+        if id < self.tile_count:
+            tx = (id % self.columns) * self.tile_width
+            ty = (id // self.columns) * self.tile_height
+            return sf.Vector2(tx, ty)
+        else:
+            raise IndexError(f'Tile id {id} not found in tileset {self.name}.')
+
 
 class MapTileset:
     """ When loading a TiledMap, a MapTileset is created for each tileset used in the map """
@@ -123,3 +131,6 @@ class MapTileset:
     @property
     def animations(self) -> Dict[int, List[Dict[str, int]]]:
         return self._data.animations
+
+    def get_tile_tex_coord(self, id: int):
+        return self._data.get_tile_tex_coord(id)

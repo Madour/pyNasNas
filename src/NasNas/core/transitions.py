@@ -21,6 +21,16 @@ class Transition(GameObject, HasCallbacks, sf.Drawable):
         self.ended = False
         self.started = False
 
+    def reset(self):
+        self.render_texture = sf.RenderTexture(self.game.window.ui_view.size.x, self.game.window.ui_view.size.y)
+        self.r = self.g = self.b = 0
+        self.a = 255
+        self.blend_mode = sf.BLEND_NONE
+        self.shapes = []
+        self.sprite = sf.Sprite(self.render_texture.texture)
+        self.ended = False
+        self.started = False
+
     @property
     def width(self):
         return self.render_texture.size.x
@@ -28,6 +38,17 @@ class Transition(GameObject, HasCallbacks, sf.Drawable):
     @property
     def height(self):
         return self.render_texture.size.y
+
+    @property
+    def fill_color(self):
+        return sf.Color(self.r, self.g, self.b, self.a)
+
+    @fill_color.setter
+    def fill_color(self, value: sf.Color):
+        self.r = value.r
+        self.g = value.g
+        self.b = value.b
+        self.a = value.a
 
     def start(self):
         if not self.started:
@@ -53,7 +74,7 @@ class Transition(GameObject, HasCallbacks, sf.Drawable):
     def updater(update_func):
         def _decorate(self):
             if not self.ended:
-                self.render_texture.clear(sf.Color(self.r, self.g, self.b, self.a))
+                self.render_texture.clear(self.fill_color)
                 if self.started:
                     update_func(self)
                 for shape in self.shapes:
@@ -73,8 +94,12 @@ class FadeInTransition(Transition):
     """ Fade transition from black screen to transparent"""
     def __init__(self, speed=5):
         super().__init__()
-        self.a = 255
         self.speed = speed
+        self.reset()
+
+    def reset(self):
+        super().reset()
+        self.a = 255
         self.update()
 
     @Transition.updater
@@ -89,8 +114,12 @@ class FadeOutTransition(Transition):
     """ Fade transition from transparent to black screen"""
     def __init__(self, speed=5):
         super().__init__()
-        self.a = 0
         self.speed = speed
+        self.reset()
+
+    def reset(self):
+        super().reset()
+        self.a = 0
         self.update()
 
     @Transition.updater
@@ -106,22 +135,26 @@ class CircleOpenTransition(Transition):
         super().__init__()
         self.speed = speed
         self.limit = math.sqrt((self.width/2)**2 + (self.height/2)**2)
-        self.shape = sf.CircleShape(0.1)
-        self.shape.origin = (0.1, 0.1)
-        self.shape.position = (self.width/2, self.height/2)
-        self.shape.fill_color = sf.Color.TRANSPARENT
-        self.shapes.append(self.shape)
+        self.reset()
+
+    def reset(self):
+        super().reset()
+        shape = sf.CircleShape(0.1)
+        shape.origin = (0.1, 0.1)
+        shape.position = (self.width / 2, self.height / 2)
+        shape.fill_color = sf.Color.TRANSPARENT
+        self.shapes.append(shape)
         self.update()
 
     @Transition.updater
     def update(self):
-        if self.shape.radius > self.limit:
+        if self.shapes[0].radius > self.limit:
             self.end()
-        elif self.shape.radius <= self.limit:
-            self.shape.radius += self.speed
+        elif self.shapes[0].radius <= self.limit:
+            self.shapes[0].radius += self.speed
         else:
-            self.shape.radius = 0
-        self.shape.origin = (self.shape.radius, self.shape.radius)
+            self.shapes[0].radius = 0
+        self.shapes[0].origin = (self.shapes[0].radius, self.shapes[0].radius)
 
 
 class CircleCloseTransition(Transition):
@@ -129,22 +162,26 @@ class CircleCloseTransition(Transition):
     def __init__(self, speed=5):
         super().__init__()
         self.speed = speed
-        self.shape = sf.CircleShape(self.width + self.height/2)
-        self.shape.origin = (self.shape.radius, self.shape.radius)
-        self.shape.position = (self.width/2, self.height/2)
-        self.shape.fill_color = sf.Color.TRANSPARENT
-        self.shapes.append(self.shape)
+        self.reset()
+
+    def reset(self):
+        super().reset()
+        shape = sf.CircleShape(math.sqrt((self.width/2)**2 + (self.height/2)**2))
+        shape.origin = (shape.radius, shape.radius)
+        shape.position = (self.width / 2, self.height / 2)
+        shape.fill_color = sf.Color.TRANSPARENT
+        self.shapes.append(shape)
         self.update()
 
     @Transition.updater
     def update(self):
-        if self.shape.radius == 0:
+        if self.shapes[0].radius == 0:
             self.end()
-        elif self.shape.radius >= self.speed:
-            self.shape.radius -= self.speed
+        elif self.shapes[0].radius >= self.speed:
+            self.shapes[0].radius -= self.speed
         else:
-            self.shape.radius = 0
-        self.shape.origin = (self.shape.radius, self.shape.radius)
+            self.shapes[0].radius = 0
+        self.shapes[0].origin = (self.shapes[0].radius, self.shapes[0].radius)
 
 
 class RotatingSquareOpenTransition(Transition):
@@ -174,24 +211,28 @@ class RotatingSquareCloseTransition(Transition):
     def __init__(self, speed: int = 5):
         super().__init__()
         self.speed = speed
-        self.shape = sf.RectangleShape()
-        self.shape.position = (self.width/2, self.height/2)
-        self.shape.size = (self.width, self.width)
-        self.shape.origin = (self.width/2, self.width/2)
-        self.shape.fill_color = sf.Color.TRANSPARENT
-        self.shapes.append(self.shape)
+        self.reset()
+
+    def reset(self):
+        super().reset()
+        shape = sf.RectangleShape()
+        shape.position = (self.width / 2, self.height / 2)
+        shape.size = (self.width, self.width)
+        shape.origin = (self.width / 2, self.width / 2)
+        shape.fill_color = sf.Color.TRANSPARENT
+        self.shapes.append(shape)
         self.update()
 
     @Transition.updater
     def update(self):
-        if self.shape.size.x == 0:
+        if self.shapes[0].size.x == 0:
             self.end()
-        elif self.shape.size.x > self.speed:
-            self.shape.size -= sf.Vector2(self.speed, self.speed)
-            self.shape.rotate(self.speed*2)
+        elif self.shapes[0].size.x > self.speed:
+            self.shapes[0].size -= sf.Vector2(self.speed, self.speed)
+            self.shapes[0].rotate(self.speed*2)
         else:
-            self.shape.size = (0, 0)
-        self.shape.origin = (self.shape.size.x/2, self.shape.size.y/2)
+            self.shapes[0].size = (0, 0)
+        self.shapes[0].origin = (self.shapes[0].size.x/2, self.shapes[0].size.y/2)
 
 
 class PixelsInTransition(Transition):
@@ -202,15 +243,20 @@ class PixelsInTransition(Transition):
         """
         super().__init__()
         self.speed = speed
-        self.shapes = []
+        self.pixel_size = pixelsize
         self.remaining = []
-        col_nb = math.ceil(self.render_texture.size.x/pixelsize)
-        row_nb = math.ceil(self.render_texture.size.y/pixelsize)
+        self.reset()
+
+    def reset(self):
+        super().reset()
+        self.remaining = []
+        col_nb = math.ceil(self.render_texture.size.x / self.pixel_size)
+        row_nb = math.ceil(self.render_texture.size.y / self.pixel_size)
         for x in range(col_nb):
             for y in range(row_nb):
                 s = sf.RectangleShape()
-                s.position = (x*pixelsize, y*pixelsize)
-                s.size = (pixelsize, pixelsize)
+                s.position = (x * self.pixel_size, y * self.pixel_size)
+                s.size = (self.pixel_size, self.pixel_size)
                 s.fill_color = sf.Color.BLACK
                 self.shapes.append(s)
                 self.remaining.append(s)
@@ -237,15 +283,20 @@ class PixelsOutTransition(Transition):
         """
         super().__init__()
         self.speed = speed
+        self.pixel_size = pixelsize
         self.shapes = []
         self.remaining = []
-        col_nb = math.ceil(self.render_texture.size.x/pixelsize)
-        row_nb = math.ceil(self.render_texture.size.y/pixelsize)
+
+    def reset(self):
+        super().reset()
+        self.remaining = []
+        col_nb = math.ceil(self.render_texture.size.x / self.pixel_size)
+        row_nb = math.ceil(self.render_texture.size.y / self.pixel_size)
         for x in range(col_nb):
             for y in range(row_nb):
                 s = sf.RectangleShape()
-                s.position = (x*pixelsize, y*pixelsize)
-                s.size = (pixelsize, pixelsize)
+                s.position = (x * self.pixel_size, y * self.pixel_size)
+                s.size = (self.pixel_size, self.pixel_size)
                 s.fill_color = sf.Color.TRANSPARENT
                 self.shapes.append(s)
                 self.remaining.append(s)

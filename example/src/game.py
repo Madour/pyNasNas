@@ -1,7 +1,9 @@
 from sfml import sf
 import src.NasNas as ns
 
+from example.src.fonts import bitmap_font
 from example.src import entities
+from example.src import menus
 
 
 class MyGame(ns.App):
@@ -21,121 +23,140 @@ class MyGame(ns.App):
         self.level = ns.Res.Maps.level
         self.level.set_collisions_objectgroup("collisions")
 
+        tileset = [t for t in self.level.tilesets if t.name == "Assets"][0]
+        self.coins = []
+        # Creating coin sprite from tileset properties
+        # 15 is the tile ID of the coin on the tileset
+        coin_anim = ns.Anim([])
+        for frame in tileset.animations[15]:
+            coin_anim.add(ns.AnimFrame(
+                ns.Rect(tileset.get_tile_tex_coord(frame['id']), (tileset.tile_width, tileset.tile_height)),
+                frame['duration'])
+            )
+        coin_spr = ns.Sprite(name="coin", texture=ns.Res.tilesets.Assets, anims={"idle": coin_anim})
+
+        for point in self.level.objectgroups['coins'].points:
+            new_coin = ns.BaseEntity("coin", coin_spr)
+            new_coin.position = point
+            self.coins.append(new_coin)
+
         # recreating the scene, same size as the level
         self.scene = self.create_scene(self.level.width * 16, self.level.height * 16)
 
         # creating the players
-        self.player = entities.Player("Player 1")
-        self.player.controls = {'right': ns.Keyboard.D, 'left': ns.Keyboard.Q, 'up': ns.Keyboard.Z, 'down': ns.Keyboard.S}
-        self.player.position = (2 * 16, 7 * 16)
+        self.player1 = entities.Player("Player 1")
+        self.player1.controls = {'right': ns.Keyboard.D, 'left': ns.Keyboard.Q, 'up': ns.Keyboard.Z, 'down': ns.Keyboard.S}
+        self.player1.position = (2 * 16, 8 * 16)
 
         self.player2 = entities.Player("Player 2")
         self.player2.controls = {'right': ns.Keyboard.RIGHT, 'left': ns.Keyboard.LEFT, 'up': ns.Keyboard.UP, 'down': ns.Keyboard.DOWN}
-        self.player2.position = (25 * 16, 7 * 16)
+        self.player2.position = (25 * 16, 8 * 16)
 
         # creating a camera for each player, the two cameras look at the same scene
         self.game_camera.reset((0, 0), (self.V_WIDTH / 2, self.V_HEIGHT))
         self.game_camera.reset_viewport((0, 0), (0.5, 1))
-        self.game_camera.follow(self.player)
-        self.game_camera.scene = self.scene
+        self.game_camera.follow(self.player1)
 
         self.game_camera2 = self.create_camera("player2", 0, ns.Rect((0, 0), (self.V_WIDTH / 2, self.V_HEIGHT)), ns.Rect((0.5, 0), (0.5, 1)))
         self.game_camera2.follow(self.player2)
-        self.game_camera2.scene = self.scene
 
-        # loading a BitmapFont from a texture and writing some texts using it
-        bitmap_font = ns.BitmapFont(ns.Res.Textures.font, (8, 8), spacings_map={"O": 8})
+        # writing texts using the bitmap font
         self.text_bitmap = ns.BitmapText("PRESS L TO DISPLAY MASK", bitmap_font)
-        self.text_bitmap.position = self.player.position+sf.Vector2(0, -28)
+        self.text_bitmap.position = sf.Vector2(2 * 16, 7 * 16) + sf.Vector2(0, -28)
         self.text_bitmap2 = ns.BitmapText("PRESS G TO SWITCH DEBUG MODE", bitmap_font)
-        self.text_bitmap2.position = self.player.position+sf.Vector2(0, -6)
+        self.text_bitmap2.position = sf.Vector2(2 * 16, 7 * 16) + sf.Vector2(0, -6)
         self.text_bitmap3 = ns.BitmapText("PRESS M TO QUAKE CAMERA", bitmap_font)
-        self.text_bitmap3.position = self.player.position + sf.Vector2(0, -18)
+        self.text_bitmap3.position = sf.Vector2(2 * 16, 7 * 16) + sf.Vector2(0, -18)
         self.text_bitmap4 = ns.BitmapText("PRESS F TO ENTER OR EXIT FULLSCREEN", bitmap_font)
-        self.text_bitmap4.position = self.player.position + sf.Vector2(0, -60)
-
-        # defining a btn_style
-        btn_anim = ns.Anim([
-            ns.AnimFrame(ns.Rect((0, 0), (64, 32)), 400),
-            ns.AnimFrame(ns.Rect((0, 32), (64, 32)), 400)
-        ])
-        btn_style = ns.ui.ButtonStyle(width=64, height=32, background=ns.Res.btn, font=ns.Res.arial, anim=btn_anim, font_size=16)
-
-        # creating a button with the btn_style we defined above
-        self.btn = ns.ui.Button("Button", style=btn_style, position=(64, 32))
-
-        # defining button action using its on_press callback decorator
-        @self.btn.on_press
-        def btn_press_action():
-            print("Button PRESSED !")
-
-        # another button
-        self.btn2 = ns.ui.Button("Button", style=btn_style, position=(64, 32+34))
-
-        @self.btn2.on_press
-        def btn2_press_action():
-            print("Button 2 PRESSED !")
-
-        # creating a game menu with the two buttons e created
-        self.game_menu = ns.ui.Menu("test", self.btn, self.btn2)
+        self.text_bitmap4.position = sf.Vector2(2 * 16, 7 * 16) + sf.Vector2(0, -60)
 
         # creating the layers
         map_back_layer = ns.Layer("map_back", self.level.layers["back"])
         map_front_layer = ns.Layer("map_front", self.level.layers["front"])
         texts_layers = ns.Layer("texts", self.text_bitmap, self.text_bitmap2, self.text_bitmap3, self.text_bitmap4)
-        entities_layer = ns.Layer("entities", self.player, self.player2)
-        self.map_collisions_layer = ns.Layer("map_collisions", self.level.objectgroups["collisions"], self.level.objectgroups["coins"])
+        self.entities_layer = ns.Layer("entities", self.player1, self.player2, *self.coins)
+        self.map_collisions_layer = ns.Layer("map_collisions", self.level.objectgroups["collisions"], self.level.objectgroups["coins"], self.level.objectgroups["path"])
 
         # creating a mask layer and adding drawables to it
-        self.mask = ns.Mask("light", self.level.width * 16, self.level.height * 16, sf.Color(20, 10, 50, 220))
+        self.mask = ns.Mask("light", self.level.width * 16, self.level.height * 16, sf.Color(20, 10, 50, 240))
 
-        self.light_growing = True
-        self.player_light = sf.CircleShape(33)
-        self.player_light.fill_color = sf.Color(self.mask.fill_color.r, self.mask.fill_color.g, self.mask.fill_color.b, 50)
-        self.player_light.position = self.player.position - sf.Vector2(0, 5)
-        self.player_light2 = sf.CircleShape(50)
-        self.player_light2.fill_color = sf.Color(self.mask.fill_color.r, self.mask.fill_color.g, self.mask.fill_color.b, 150)
-        self.player_light2.position = self.player.position - sf.Vector2(0, 5)
+        self.p1_light = entities.Light(self.player1.position, self.mask.fill_color)
+        self.p2_light = entities.Light(self.player2.position, self.mask.fill_color)
 
-        self.mask.add(self.player_light2)
-        self.mask.add(self.player_light)
+        self.mask.add(self.p1_light)
+        self.mask.add(self.p2_light)
 
         # adding the created layer to the scene
-        self.scene.add_layer(entities_layer, 4)
+        self.scene.add_layer(self.entities_layer, 4)
         self.scene.add_layer(texts_layers, 2)
         self.scene.add_layer(map_front_layer, 1)
         self.scene.add_layer(map_back_layer, 0)
 
+        # creating HUD scene and camera
+        self.HUD_scene = self.create_scene(self.window.ui_view.size.x, self.window.ui_view.size.y)
+        self.HUD_camera = self.create_camera("HUD_camera", 5, ns.Rect((0, 0), self.window.ui_view.size))
+
+        # players scores text
+        self.p1_score_text = sf.Text(str(self.player1.score))
+        self.p1_score_text.font = ns.Res.arial
+        self.p1_score_text.character_size = 16
+        self.p2_score_text = sf.Text(str(self.player2.score))
+        self.p2_score_text.font = ns.Res.arial
+        self.p2_score_text.character_size = 16
+        self.p2_score_text.position = sf.Vector2(self.window.ui_view.size.x - self.window.ui_view.size.x/2, 0)
+
+        # adding the text to HUD_scene
+        self.HUD_scene.add_layer(ns.Layer("scores", self.p1_score_text, self.p2_score_text), 0)
+
+        # creating the menus
+        self.main_menu = menus.MainMenu()
+        self.main_menu.open()
+        self.game_menu = ns.ui.VerticalMenu("game_menu", menus.menu_style, menus.resume_btn, menus.quit_btn)
+        self.game_menu.center = self.window.ui_view.center
+
         # creating the opening transition and starting it
-        self.tr_in = ns.CircleOpenTransition(speed=8)
-        self.tr_in.start()
+        self.window_open_transition = ns.FadeInTransition(speed=4)
+        self.window_open_transition.start()
+
+        self.menu_exit_transition = ns.FadeOutTransition(speed=4)
+
+        @self.menu_exit_transition.on_end
+        def menu_exit_on_end():
+            self.main_menu.close()
+            self.game_camera.scene = self.scene
+            self.game_camera2.scene = self.scene
+            self.HUD_camera.scene = self.HUD_scene
+            self.game_start_transition.start()
+
+        self.game_start_transition = ns.RotatingSquareOpenTransition(speed=5)
 
         # creating the closing transition
-        self.tr_out = ns.RotatingSquareCloseTransition(speed=5)
+        self.quit_transition = ns.RotatingSquareCloseTransition(speed=5)
 
         # defining on_end callback of the closing transition
-        @self.tr_out.on_end
-        def tr_out_ending():
+        @self.quit_transition.on_end
+        def quit_transition_ending():
             # when the transition ends, the window will close
             self.window.close()
 
         # adding some debug texts, can be seen on screen when debug mode is active
-        self.add_debug_text(self.player, "onground", (0, 0))
+        self.add_debug_text(self.player1, "onground", (0, 0))
         self.add_debug_text(self, "transitions", (150, 0))
         self.add_debug_text(self, "inputs", (0, 16))
-        self.add_debug_text(self.player, "velocity", (0, 32))
-        self.add_debug_text(self.player, "jumping", (150, 32))
-        self.add_debug_text(self.player, "falling", (300, 32))
+        self.add_debug_text(self.player1, "velocity", (0, 32))
+        self.add_debug_text(self.player1, "jumping", (150, 32))
+        self.add_debug_text(self.player1, "falling", (300, 32))
 
     def event_handler(self, event):
         if event == sf.Event.CLOSED:
-            self.tr_out.start()
+            self.window.close()
 
-        if event == sf.Event.KEY_PRESSED:
+        elif event == sf.Event.KEY_RELEASED:
             if event["code"] == sf.Keyboard.ESCAPE:     # closing the game
-                self.tr_out.start()
+                self.game_menu.open()
 
-            elif event["code"] == ns.Keyboard.R:        # restarting the game
+        elif event == sf.Event.KEY_PRESSED:
+            if event["code"] == ns.Keyboard.R:        # restarting the game
                 self.window.close()
                 self.__init__()
                 self.run()
@@ -160,9 +181,6 @@ class MyGame(ns.App):
                 else:
                     self.scene.add_mask(self.mask, 10)
 
-            elif event["code"] == ns.Keyboard.J:        # open menu
-                self.game_menu.open()
-
     def update(self):
         # updating the TiledMap
         self.level.update()
@@ -174,21 +192,12 @@ class MyGame(ns.App):
                     drawable.update(self.dt, self.inputs)
             layer.ysort()
 
-        # doing the light animation
-        if self.player_light.radius < 33 and self.light_growing:
-            self.player_light.radius += 0.015
-            self.player_light2.radius += 0.05
-            self.player_light.origin = (self.player_light.radius, self.player_light.radius+10)
-            self.player_light2.origin = (self.player_light2.radius, self.player_light2.radius+10)
-        else:
-            self.light_growing = False
+        # updating score texts
+        self.p1_score_text.string = str(self.player1.score)
+        self.p2_score_text.string = str(self.player2.score)
 
-        if not self.light_growing and self.player_light.radius > 30:
-            self.player_light.radius -= 0.015
-            self.player_light2.radius -= 0.05
-            self.player_light.origin = (self.player_light.radius, self.player_light.radius+10)
-            self.player_light2.origin = (self.player_light2.radius, self.player_light2.radius+10)
-        else:
-            self.light_growing = True
-        self.player_light.position = self.player.position - sf.Vector2(0, 5)
-        self.player_light2.position = self.player.position - sf.Vector2(0, 5)
+        # updating lights
+        self.p1_light.update()
+        self.p1_light.position = self.player1.position - sf.Vector2(0, 5)
+        self.p2_light.update()
+        self.p2_light.position = self.player2.position - sf.Vector2(0, 5)
