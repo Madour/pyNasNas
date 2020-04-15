@@ -19,4 +19,4 @@ __all__ = [
 ]
 
 __author__ = "Modar NASSER"
-__version__ = '0.1.1'
+__version__ = '0.1.2'

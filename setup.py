@@ -6,7 +6,7 @@ with open("readme.md", "r") as rdme:
 
 setup(
     name="NasNas",
-    version="0.1.1",
+    version="0.1.2",
     author="Modar Nasser",
     author_email="modar1999@gmail.com",
     description="A simple game framework to get started quickly with python and sfml.",
@@ -15,7 +15,6 @@ setup(
     url="https://github.com/Madour/NasNas",
     packages=find_packages(where='src'),
     package_dir={'': 'src'},
-    install_requires=['sfml>=2.3'],
     keywords=["sfml", "game dev", "game engine", "framework"],
     classifiers=[
         "Development Status :: 3 - Alpha",
