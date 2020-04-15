@@ -78,7 +78,7 @@ class MyGame(ns.App):
         self.map_collisions_layer = ns.Layer("map_collisions", self.level.objectgroups["collisions"], self.level.objectgroups["coins"], self.level.objectgroups["path"])
 
         # creating a mask layer and adding drawables to it
-        self.mask = ns.Mask("light", self.level.width * 16, self.level.height * 16, sf.Color(20, 10, 50, 240))
+        self.mask = ns.Mask("light", self.level.width * 16, self.level.height * 16, sf.Color(20, 10, 80, 238))
 
         self.p1_light = entities.Light(self.player1.position, self.mask.fill_color)
         self.p2_light = entities.Light(self.player2.position, self.mask.fill_color)
@@ -115,10 +115,10 @@ class MyGame(ns.App):
         self.game_menu.center = self.window.ui_view.center
 
         # creating the opening transition and starting it
-        self.window_open_transition = ns.FadeInTransition(speed=4)
+        self.window_open_transition = ns.transitions.FadeIn(speed=4)
         self.window_open_transition.start()
 
-        self.menu_exit_transition = ns.FadeOutTransition(speed=4)
+        self.menu_exit_transition = ns.transitions.FadeOut(speed=4)
 
         @self.menu_exit_transition.on_end
         def menu_exit_on_end():
@@ -128,10 +128,10 @@ class MyGame(ns.App):
             self.HUD_camera.scene = self.HUD_scene
             self.game_start_transition.start()
 
-        self.game_start_transition = ns.RotatingSquareOpenTransition(speed=5)
+        self.game_start_transition = ns.transitions.RotatingSquareOpen(speed=5)
 
         # creating the closing transition
-        self.quit_transition = ns.RotatingSquareCloseTransition(speed=5)
+        self.quit_transition = ns.transitions.RotatingSquareClose(speed=5)
 
         # defining on_end callback of the closing transition
         @self.quit_transition.on_end

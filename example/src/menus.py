@@ -13,24 +13,40 @@ btn_style = ns.ui.ButtonStyle(width=64, height=32, background=ns.Res.ui_texture,
 
 play_btn = ns.ui.Button("PLAY", style=btn_style)
 
+
 @play_btn.on_press
 def btn_press_action():
     play_btn.game.menu_exit_transition.start()
-
+@play_btn.on_hover
+def btn_hover():
+    play_btn.anim_player.resume()
+@play_btn.on_unhover
+def btn_unhover():
+    play_btn.anim_player.stop()
 
 resume_btn = ns.ui.Button("RESUME", style=btn_style)
 
 @resume_btn.on_press
 def resume_btn_on_press():
     resume_btn.game.game_menu.close()
-
+@resume_btn.on_hover
+def btn_hover():
+    resume_btn.anim_player.resume()
+@resume_btn.on_unhover
+def btn_unhover():
+    resume_btn.anim_player.stop()
 
 quit_btn = ns.ui.Button("QUIT", style=btn_style)
 
 @quit_btn.on_press
 def quit_btn_press_action():
     quit_btn.game.quit_transition.start()
-
+@quit_btn.on_hover
+def btn_hover():
+    quit_btn.anim_player.resume()
+@quit_btn.on_unhover
+def btn_unhover():
+    quit_btn.anim_player.stop()
 
 # BoxBorder can generate a box of any size with the given texture pattern
 menu_border = ns.ui.BoxBorder(ns.Res.ui_texture, (0, 64), (8, 8))

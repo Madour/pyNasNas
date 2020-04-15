@@ -3,11 +3,12 @@ import random
 
 from sfml import sf
 
-from ..data.callbacks import callback, HasCallbacks
-from ..data.game_obj import GameObject
+from ..data.callbacks import HasCallbacks as __HasCallbacks
+from ..data.callbacks import callback as _callback
+from ..data.game_obj import GameObject as __GameObject
 
 
-class Transition(GameObject, HasCallbacks, sf.Drawable):
+class Transition(__GameObject, __HasCallbacks, sf.Drawable):
     def __init__(self):
         if self.__class__.__name__ == __class__.__name__:
             raise NotImplementedError("Transition class is not instantiable. Please use inheritance to create a Transition.")
@@ -50,14 +51,18 @@ class Transition(GameObject, HasCallbacks, sf.Drawable):
         self.b = value.b
         self.a = value.a
 
+    @_callback("on_start")
+    def on_start(self, user_fn):
+        return user_fn
+
     def start(self):
         if not self.started:
             self.started = True
             self.game.transitions.append(self)
             self.callbacks.call("on_start")
 
-    @callback("on_start")
-    def on_start(self, user_fn):
+    @_callback("on_end")
+    def on_end(self, user_fn):
         return user_fn
 
     def end(self):
@@ -65,10 +70,6 @@ class Transition(GameObject, HasCallbacks, sf.Drawable):
             self.ended = True
             self.game.transitions.remove(self)
             self.callbacks.call("on_end")
-
-    @callback("on_end")
-    def on_end(self, user_fn):
-        return user_fn
 
     @staticmethod
     def updater(update_func):
@@ -90,7 +91,7 @@ class Transition(GameObject, HasCallbacks, sf.Drawable):
         target.draw(self.sprite)
 
 
-class FadeInTransition(Transition):
+class FadeIn(Transition):
     """ Fade transition from black screen to transparent"""
     def __init__(self, speed=5):
         super().__init__()
@@ -110,7 +111,7 @@ class FadeInTransition(Transition):
             self.end()
 
 
-class FadeOutTransition(Transition):
+class FadeOut(Transition):
     """ Fade transition from transparent to black screen"""
     def __init__(self, speed=5):
         super().__init__()
@@ -130,7 +131,7 @@ class FadeOutTransition(Transition):
             self.end()
 
 
-class CircleOpenTransition(Transition):
+class CircleOpen(Transition):
     def __init__(self, speed=5):
         super().__init__()
         self.speed = speed
@@ -157,7 +158,7 @@ class CircleOpenTransition(Transition):
         self.shapes[0].origin = (self.shapes[0].radius, self.shapes[0].radius)
 
 
-class CircleCloseTransition(Transition):
+class CircleClose(Transition):
     """ Closing circle transition"""
     def __init__(self, speed=5):
         super().__init__()
@@ -184,7 +185,7 @@ class CircleCloseTransition(Transition):
         self.shapes[0].origin = (self.shapes[0].radius, self.shapes[0].radius)
 
 
-class RotatingSquareOpenTransition(Transition):
+class RotatingSquareOpen(Transition):
     def __init__(self, speed=5):
         super().__init__()
         self.speed = speed
@@ -207,7 +208,7 @@ class RotatingSquareOpenTransition(Transition):
         self.shape.origin = (self.shape.size.x/2, self.shape.size.y/2)
 
 
-class RotatingSquareCloseTransition(Transition):
+class RotatingSquareClose(Transition):
     def __init__(self, speed: int = 5):
         super().__init__()
         self.speed = speed
@@ -235,7 +236,7 @@ class RotatingSquareCloseTransition(Transition):
         self.shapes[0].origin = (self.shapes[0].size.x/2, self.shapes[0].size.y/2)
 
 
-class PixelsInTransition(Transition):
+class PixelsIn(Transition):
     """ From black screen to transparent square by square """
     def __init__(self, speed: int, pixelsize: float):
         """ Warning : a small pixelsize and big speed will lead to severe frame drops.
@@ -275,7 +276,7 @@ class PixelsInTransition(Transition):
             self.end()
 
 
-class PixelsOutTransition(Transition):
+class PixelsOut(Transition):
     """ From transparent screen to black screen square by square """
     def __init__(self, speed: int, pixelsize: float):
         """ Warning : a small pixelsize and big speed will lead to severe frame drops.

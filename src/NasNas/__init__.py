@@ -7,8 +7,7 @@ from . import ui
 __all__ = [
     'App', 'Camera', 'Scene', 'Layer', 'Mask', 'Sprite', 'Anim', 'AnimFrame', 'BitmapText', 'BitmapFont',
     'BaseEntity', 'PlatformerEntity',
-    'Transition', 'FadeInTransition', 'FadeOutTransition', 'CircleOpenTransition', 'CircleCloseTransition',
-    'RotatingSquareCloseTransition', 'RotatingSquareOpenTransition', 'PixelsInTransition', 'PixelsOutTransition',
+    'transitions',
 
     'Keyboard', 'Rect', 'SCREEN_W', 'SCREEN_H', 'LineShape', 'EllipseShape',
 
@@ -20,4 +19,4 @@ __all__ = [
 ]
 
 __author__ = "Modar NASSER"
-__version__ = '0.1'
+__version__ = '0.1.1'

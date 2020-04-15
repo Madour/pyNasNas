@@ -182,40 +182,44 @@ class PlatformerEntity(BaseEntity):
             self.falling = False
         self.rx += self.velocity.x * dt
 
-        for box in self.game.level.collisions:
-            if box.top <= self.collision_box.top < box.bottom or box.top < self.collision_box.bottom <= box.bottom \
-                    or self.collision_box.top <= box.top < self.collision_box.bottom or self.collision_box.top < box.bottom <= self.collision_box.bottom:
-                # left collision
-                if self.velocity.x < 0:
-                    if self.collision_box.left//16 == (box.right -1) // 16 and self.rx < 0.3:
-                        self.rx -= self.velocity.x*dt
-                        self.velocity.x = 0
-                # rigth collision
-                if self.velocity.x > 0:
-                    if self.collision_box.right//16 == box.left // 16 and self.rx > 0.7:
-                        self.rx -= self.velocity.x*dt
-                        self.velocity.x = 0
+        if self.game.level:
+            for box in self.game.level.collisions:
+                if box.top <= self.collision_box.top < box.bottom or box.top < self.collision_box.bottom <= box.bottom \
+                        or self.collision_box.top <= box.top < self.collision_box.bottom or self.collision_box.top < box.bottom <= self.collision_box.bottom:
+                    # left collision
+                    if self.velocity.x < 0:
+                        if self.collision_box.left//16 == (box.right -1) // 16 and self.rx < 0.3:
+                            self.rx -= self.velocity.x*dt
+                            self.velocity.x = 0
+                    # rigth collision
+                    if self.velocity.x > 0:
+                        if self.collision_box.right//16 == box.left // 16 and self.rx > 0.7:
+                            self.rx -= self.velocity.x*dt
+                            self.velocity.x = 0
 
         while self.rx > 1: self.rx -= 1; self.gx += 1
         while self.rx < 0: self.rx += 1; self.gx -= 1
 
         self.ry += self.velocity.y * dt
         bot_collision = False
-        for box in self.game.level.collisions:
-            if box.left / 16 <= self.gx < (box.right) / 16:
-                # top collision
-                if self.velocity.y < 0:
-                    if self.collision_box.top//16 == (box.bottom - 1) // 16 and self.ry < 0.99:
-                        self.y = box.bottom + self.sprite.origin.y
-                        self.falling = True
+
+        if self.game.level:
+            for box in self.game.level.collisions:
+                if box.left / 16 <= self.gx < (box.right) / 16:
+                    # top collision
+                    if self.velocity.y < 0:
+                        if self.collision_box.top//16 == (box.bottom - 1) // 16 and self.ry < 0.99:
+                            self.y = box.bottom + self.sprite.origin.y
+                            self.falling = True
+                            self.velocity.y = 0
+                    # bottom collision
+                    if self.gy + 1 == box.top / 16 and self.ry >= 0.99:
+                        self.ry = 0.99
                         self.velocity.y = 0
-                # bottom collision
-                if self.gy + 1 == box.top / 16 and self.ry >= 0.99:
-                    self.ry = 0.99
-                    self.velocity.y = 0
-                    self.land()
-                    bot_collision = True
-                    break
+                        self.land()
+                        bot_collision = True
+                        break
+
         if not bot_collision:
             self.onground = False
         while self.ry > 1: self.ry -= 1; self.gy += 1

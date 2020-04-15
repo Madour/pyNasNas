@@ -19,6 +19,7 @@ class Button(GameObject, HasCallbacks, sf.Drawable):
         self._style = style
         self._render_texture = sf.RenderTexture(self._style.width, self._style.height)
         self.anim_player = AnimPlayer(self._style.anim)
+        self._hovered = False
 
         self._create()
 
@@ -40,6 +41,10 @@ class Button(GameObject, HasCallbacks, sf.Drawable):
         self._bg.position = self._position
         self._front.position = self._position + self._style.size / 2 \
                                - sf.Vector2(self._front.global_bounds.width / 2, self._front.global_bounds.height / 2)
+
+    @property
+    def hovered(self):
+        return self._hovered
 
     def _create(self):
         self.anim_player.play(self._style.anim)
@@ -69,6 +74,22 @@ class Button(GameObject, HasCallbacks, sf.Drawable):
 
     def press(self):
         self.callbacks.call("on_press")
+
+    @callback("on_hover")
+    def on_hover(self, user_fn):
+        return user_fn
+
+    def hover(self):
+        self._hovered = True
+        self.callbacks.call("on_hover")
+
+    @callback("on_unhover")
+    def on_unhover(self, user_fn):
+        return user_fn
+
+    def unhover(self):
+        self._hovered = False
+        self.callbacks.call("on_unhover")
 
     def update(self):
         if isinstance(self._bg, sf.Sprite):

@@ -7,17 +7,12 @@ from .entities import BaseEntity, PlatformerEntity
 from .text import BitmapText, BitmapFont
 from .debug import Logger
 from .window import RenderWindow
-
-from .transitions import (
-    Transition, FadeInTransition, FadeOutTransition, CircleOpenTransition, CircleCloseTransition,
-    RotatingSquareCloseTransition, RotatingSquareOpenTransition, PixelsInTransition, PixelsOutTransition
-)
+from . import transitions
 
 __all__ = [
     'App', 'Camera', 'Scene', 'Layer', 'Mask',
     'Sprite', 'Anim', 'AnimFrame', 'BitmapText', 'BitmapFont',
     'BaseEntity', 'PlatformerEntity',
-    'Transition', 'FadeInTransition', 'FadeOutTransition', 'CircleOpenTransition', 'CircleCloseTransition',
-    'RotatingSquareCloseTransition', 'RotatingSquareOpenTransition', 'PixelsInTransition', 'PixelsOutTransition',
+    'transitions',
     'Logger', 'RenderWindow'
 ]

@@ -62,6 +62,10 @@ class Menu(GameObject, HasCallbacks, sf.Drawable):
         else:
             raise TypeError("Menu button should be a Button instance.")
 
+    @callback('on_open')
+    def on_open(self, user_fn):
+        return user_fn
+
     def open(self):
         for btn in self._buttons:
             if btn == self._buttons[self.cursor_index]:
@@ -72,18 +76,14 @@ class Menu(GameObject, HasCallbacks, sf.Drawable):
         self.opened = True
         self.callbacks.call("on_open")
 
-    @callback('on_open')
-    def on_open(self, user_fn):
+    @callback('on_close')
+    def on_close(self, user_fn):
         return user_fn
 
     def close(self):
         self.game.menus.remove(self)
         self.opened = False
         self.callbacks.call("on_close")
-
-    @callback('on_close')
-    def on_close(self, user_fn):
-        return user_fn
 
     def event_handler(self, event: sf.Event):
         if event == sf.Event.KEY_RELEASED:
@@ -92,13 +92,13 @@ class Menu(GameObject, HasCallbacks, sf.Drawable):
             elif event['code'] == Keyboard.ESCAPE:
                 self.close()
             elif event['code'] == Keyboard.DOWN:
-                self._buttons[self.cursor_index].anim_player.stop()
+                self._buttons[self.cursor_index].unhover()
                 self.cursor_index = (self.cursor_index + 1) % len(self._buttons)
-                self._buttons[self.cursor_index].anim_player.resume()
+                self._buttons[self.cursor_index].hover()
             elif event['code'] == Keyboard.UP:
-                self._buttons[self.cursor_index].anim_player.stop()
+                self._buttons[self.cursor_index].unhover()
                 self.cursor_index = (self.cursor_index - 1) % len(self._buttons)
-                self._buttons[self.cursor_index].anim_player.resume()
+                self._buttons[self.cursor_index].hover()
 
     def update(self):
         for btn in self._buttons:

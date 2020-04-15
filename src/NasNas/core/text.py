@@ -19,7 +19,7 @@ class BitmapFont:
 
         self.char_size = to_Vector2(char_size)
 
-        self.chars_map = " ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+        self.chars_map = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
         if chars_map:
             self.chars_map = chars_map
 

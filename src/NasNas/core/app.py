@@ -42,7 +42,9 @@ class App:
         self._window = window.RenderWindow(sf.VideoMode(w_width, w_height), self.name)
 
         if self.desired_fps:
-            self.window.framerate_limit = self.desired_fps
+            self._window.framerate_limit = self.desired_fps
+
+        self._level = None
 
         self._fullscreen = False
 
@@ -75,6 +77,14 @@ class App:
     @property
     def window(self) -> window.RenderWindow:
         return self._window
+
+    @property
+    def level(self):
+        return self._level
+
+    @level.setter
+    def level(self, value):
+        self._level = value
 
     @property
     def fullscreen(self) -> bool:

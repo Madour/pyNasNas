@@ -17,16 +17,21 @@ class Player(ns.PlatformerEntity):
             inputs.remove(self.controls['up'])
 
         if inputs:
+            did_action = False
             for key in inputs:
                 if key == self.controls['down'] and self.onground:
                     self.idle()
                     break
                 elif key == self.controls['right']:
+                    did_action = True
                     self.walk_right()
                     break
                 elif key == self.controls['left']:
+                    did_action = True
                     self.walk_left()
                     break
+            if not did_action:
+                self.idle()
         else:
             self.idle()
 

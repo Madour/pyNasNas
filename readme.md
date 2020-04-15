@@ -23,6 +23,22 @@
 
 ### Install
 
+#### From pip
+``` 
+python3 -m pip install NasNas
+```
+Then you can import NasNas anywhere in your projects
+```python
+import NasNas as ns
+```
+
+#### From source
+Download and extract the repository. Then run 
+```
+python3 setup.py install
+```
+
+#### Local install
 Let's say your project has the following structure
 ```
 YourProject
@@ -39,7 +55,7 @@ YourProject
         |_ NasNas
     main.py
 ```
-Then you can, import the framework with:
+Then you can, import NasNas with:
  ```python 
 import src.NasNas as ns
 ```
