@@ -1,4 +1,5 @@
 import inspect
+import os
 
 from sfml import sf
 
@@ -10,13 +11,16 @@ class Logger(GameObject):
     @classmethod
     def log(cls, *args):
         line = inspect.stack()[1][2]
-        path = inspect.stack()[1][1].split('\\')
+        path = inspect.stack()[1][1].split(os.sep)
         file = path[-2]+'/'+path[-1]
         metadata = '[' + str(line) + '|' + file + ']'
         while len(metadata) < 25:
             metadata += ' '
         if cls.game.debug:
-            print(metadata, args)
+            print(metadata, end=" ")
+            for arg in args:
+                print(arg, end=" ")
+            print()
 
 
 class DebugText(sf.Text):
