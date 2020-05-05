@@ -27,8 +27,9 @@ class LineShape(sf.Drawable):
 
     @position.setter
     def position(self, pos: Union[Tuple[float, float], sf.Vector2]):
+        old_pos = self._position
         self._position = to_Vector2(pos)
-        self.update(offset=True)
+        self.update(offset=self._position-old_pos)
 
     @property
     def color(self) -> sf.Color:
@@ -59,7 +60,7 @@ class LineShape(sf.Drawable):
                 self._vertexarray[i].color = self._color
         if offset:
             for vertex in self._vertexarray:
-                vertex.position += self._position
+                vertex.position += offset
         if not color and not append and not offset:
             self._vertexarray.resize(self.point_count)
             for i in range(self.point_count):

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.3.3" orientation="orthogonal" renderorder="left-up" compressionlevel="0" width="50" height="50" tilewidth="16" tileheight="16" infinite="0" nextlayerid="12" nextobjectid="241">
+<map version="1.2" tiledversion="1.3.3" orientation="orthogonal" renderorder="left-up" compressionlevel="0" width="50" height="50" tilewidth="16" tileheight="16" infinite="0" nextlayerid="12" nextobjectid="243">
  <tileset firstgid="1" name="Assets" tilewidth="16" tileheight="16" tilecount="322" columns="23">
   <image source="../tilesets/Assets.png" width="368" height="224"/>
   <tile id="6">
@@ -227,6 +227,9 @@
  <objectgroup color="#ffffff" id="10" name="path">
   <object id="179" x="69" y="133.5">
    <polyline points="0,0 33.5,-1 68.25,-26 94.5,-3.75 130.75,-3.25 123,-9.75 123.25,2.25 130.25,-3"/>
+  </object>
+  <object id="242" x="48" y="304">
+   <polyline points="0,0 80,-80 112,16 16,80"/>
   </object>
  </objectgroup>
  <objectgroup color="#ffff00" id="8" name="coins">

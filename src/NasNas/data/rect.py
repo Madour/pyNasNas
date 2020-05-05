@@ -7,6 +7,10 @@ class Rect(sf.Rect):
     def __init__(self, pos: Union[Tuple[float, float], sf.Vector2], size: Union[Tuple[float, float], sf.Vector2]):
         super().__init__(pos, size)
 
+    @classmethod
+    def from_rect(cls, sf_rect: sf.Rect):
+        return Rect((sf_rect.left, sf_rect.top), (sf_rect.width, sf_rect.height))
+
     @property
     def size(self):
         return sf.Vector2(self.width, self.height)
