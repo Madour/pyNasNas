@@ -51,9 +51,15 @@ class LineShape(sf.Drawable):
             self._points.pop(index)
             self.update()
 
+    def set_point(self, index: int, point: Union[Tuple[float, float], sf.Vector2]):
+        if index >= len(self._points):
+            raise IndexError(f"Point number {index} out of range.")
+        else:
+            self._points[index] = to_Vector2(point)
+            self.update()
+
     def update(self, append=False, color=False, offset=False):
         if append:
-            self._vertexarray.resize(self.point_count)
             self._vertexarray.append(sf.Vertex(position=self._points[-1], color=self._color))
         if color:
             for i in range(self.point_count):
