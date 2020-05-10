@@ -1,4 +1,4 @@
-# NasNas
+# pyNasNas
 ### A simple game framework to get started quickly with python and sfml.
 
 ### Features :
@@ -67,6 +67,10 @@ Visit the [wiki](https://github.com/Madour/pySFMLGameEngine/wiki) to get started
 You can also take a look at the example project to see how to use it.
 
 Be sure to run run_example.py from example folder like this : `python3 ../run_example.py`
+
+### Other
+
+A C++ version of NasNas is under development, you can check it out [here](https://github.com/Madour/NasNas)
 
 ### Author
 

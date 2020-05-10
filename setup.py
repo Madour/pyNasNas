@@ -12,7 +12,7 @@ setup(
     description="A simple game framework to get started quickly with python and sfml.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/Madour/NasNas",
+    url="https://github.com/Madour/pyNasNas",
     packages=find_packages(where='src'),
     package_dir={'': 'src'},
     keywords=["sfml", "game dev", "game engine", "framework"],
