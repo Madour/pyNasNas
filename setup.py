@@ -6,7 +6,7 @@ with open("readme.md", "r") as rdme:
 
 setup(
     name="NasNas",
-    version="0.1.2",
+    version="0.1.3z",
     author="Modar Nasser",
     author_email="modar1999@gmail.com",
     description="A simple game framework to get started quickly with python and sfml.",

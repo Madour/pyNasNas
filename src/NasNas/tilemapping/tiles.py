@@ -96,9 +96,15 @@ class Tile(sf.Drawable):
         modifier = [sf.Vector2(0, 0), sf.Vector2(0, 0), sf.Vector2(0, 0), sf.Vector2(0, 0)]
         index0, index1, index2, index3 = range(4)
         if TileTransformation.DIAGONAL_FLIP in self._transformations:
-            index2 = 0
-            index0 = 2
-            tex_coords[0], tex_coords[2] = tex_coords[2], tex_coords[0]
+            if self._transformations == [TileTransformation.HORIZONTAL_FLIP, TileTransformation.DIAGONAL_FLIP] \
+                    or self._transformations == [TileTransformation.VERTICAL_FLIP, TileTransformation.DIAGONAL_FLIP]:
+                index0 = 2
+                index2 = 0
+                tex_coords[0], tex_coords[2] = tex_coords[2], tex_coords[0]
+            else:
+                index1 = 3
+                index3 = 1
+                tex_coords[1], tex_coords[3] = tex_coords[3], tex_coords[1]
         if TileTransformation.HORIZONTAL_FLIP in self._transformations:
             modifier[index0] += sf.Vector2(self._tileset.tile_width, 0)
             modifier[index1] += sf.Vector2(-self._tileset.tile_width, 0)
