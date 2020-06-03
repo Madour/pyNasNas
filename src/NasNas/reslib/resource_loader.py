@@ -98,13 +98,13 @@ class Dir:
         files.sort(key=lambda x: x[0])
 
         for name, val in dirs:
-            print(("│" + " " * 3) * (indent - 1), end='')
+            print(("│" + " " * 2) * (indent - 1), end='')
             print("├" + "─", end='')
             print(f" {name} : {type(val).__name__}")
             val.print_tree(indent=indent + 1)
 
         for name, val in files:
-            print(("│" + " " * 3) * (indent - 1), end='')
+            print(("│" + " " * 2) * (indent - 1), end='')
             if (name, val) == files[-1]:
                 print("└" + "─", end='')
             else:

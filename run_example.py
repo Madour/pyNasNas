@@ -23,6 +23,7 @@ loading_window.display()
 #################################
 
 ns.Res.load()
+ns.Res.print_tree()
 
 from example.src.game import MyGame
 
