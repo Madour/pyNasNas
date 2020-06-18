@@ -8,7 +8,7 @@ from .sprites import Anim, AnimPlayer
 
 
 class BaseEntity(GameObject, sf.Drawable):
-    def __init__(self, name: str, data):
+    def __init__(self, name: str, data, gridsize : int = 16):
         super().__init__()
         self.data = data
         self.name = name
@@ -34,7 +34,8 @@ class BaseEntity(GameObject, sf.Drawable):
         self.collision_box_shape.position = (self.collision_box.left, self.collision_box.top)
         self.collision_box_shape.fill_color = sf.Color(200, 0, 0, 150)
 
-
+        self.gridsize = gridsize
+            
     @property
     def anim_state(self):
         return self._anim_state
@@ -65,21 +66,21 @@ class BaseEntity(GameObject, sf.Drawable):
 
     @property
     def x(self):
-        return (self.gx + self.rx) * 16
+        return (self.gx + self.rx) * self.gridsize
 
     @x.setter
     def x(self, value):
-        self.gx = value // 16
-        self.rx = (value - self.gx*16)/16
+        self.gx = value // self.gridsize
+        self.rx = (value - self.gx*self.gridsize)/self.gridsize
 
     @property
     def y(self):
-        return (self.gy + self.ry) * 16
+        return (self.gy + self.ry) * self.gridsize
 
     @y.setter
     def y(self, value):
-        self.gy = value // 16
-        self.ry = (value - self.gy*16)/16
+        self.gy = value // self.gridsize
+        self.ry = (value - self.gy*self.gridsize)/self.gridsize
 
     @property
     def global_bounds(self):
@@ -137,7 +138,7 @@ class PlatformerEntity(BaseEntity):
             self.game.level.collisions.sort(key=lambda b:abs(b.bottom-self.collision_box.top))
             col_over = [x for x in self.game.level.collisions if x.bottom < self.collision_box.top and x.left <= self.x <= x.right]
 
-        if not col_over or (col_over and self.collision_box.top // 16 != col_over[0].bottom // 16):
+        if not col_over or (col_over and self.collision_box.top // self.gridsize != col_over[0].bottom // self.gridsize):
             self.jumping = True
             self.onground = False
             self.velocity.y = self.jump_velocity.y
@@ -188,12 +189,12 @@ class PlatformerEntity(BaseEntity):
                         or self.collision_box.top <= box.top < self.collision_box.bottom or self.collision_box.top < box.bottom <= self.collision_box.bottom:
                     # left collision
                     if self.velocity.x < 0:
-                        if self.collision_box.left//16 == (box.right -1) // 16 and self.rx < 0.3:
+                        if self.collision_box.left//self.gridsize == (box.right -1) // self.gridsize and self.rx < 0.3:
                             self.rx -= self.velocity.x*dt
                             self.velocity.x = 0
                     # rigth collision
                     if self.velocity.x > 0:
-                        if self.collision_box.right//16 == box.left // 16 and self.rx > 0.7:
+                        if self.collision_box.right//self.gridsize == box.left // self.gridsize and self.rx > 0.7:
                             self.rx -= self.velocity.x*dt
                             self.velocity.x = 0
 
@@ -205,15 +206,15 @@ class PlatformerEntity(BaseEntity):
 
         if self.game.level:
             for box in self.game.level.collisions:
-                if box.left / 16 <= self.gx < (box.right) / 16:
+                if box.left / self.gridsize <= self.gx < (box.right) / self.gridsize:
                     # top collision
                     if self.velocity.y < 0:
-                        if self.collision_box.top//16 == (box.bottom - 1) // 16 and self.ry < 0.99:
+                        if self.collision_box.top//self.gridsize == (box.bottom - 1) // self.gridsize and self.ry < 0.99:
                             self.y = box.bottom + self.sprite.origin.y
                             self.falling = True
                             self.velocity.y = 0
                     # bottom collision
-                    if self.gy + 1 == box.top / 16 and self.ry >= 0.99:
+                    if self.gy + 1 == box.top / self.gridsize and self.ry >= 0.99:
                         self.ry = 0.99
                         self.velocity.y = 0
                         self.land()
